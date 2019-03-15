@@ -34,7 +34,6 @@ for i in range(cross_number):
                 if cross[i][j] == cross[x][y]:
                     cross_adjacency_matrix[i][x] = 1
 
-
-
+print("hahahaha")
 print(cross_adjacency_matrix)
 
