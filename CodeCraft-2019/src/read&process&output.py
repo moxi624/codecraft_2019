@@ -35,6 +35,6 @@ for i in range(cross_number):
                     cross_adjacency_matrix[i][x] = 1
 
 
-for i in range(30):
-    print(cross_adjacency_matrix[0][i])
+
+print(cross_adjacency_matrix)
 
