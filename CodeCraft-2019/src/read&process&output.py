@@ -37,4 +37,6 @@ for i in range(cross_number):
 
 
 print(cross_adjacency_matrix)
-
+print("dsfa")
+print("dsfa")
+print("dsfa")
