@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
 
+print("hahahaha")
+print("hahahaha")
+print("hahahaha")
+print("hahahaha")
 
 # def input_txt(file_address):
 #     with open(file_address, "r") as f:
@@ -34,8 +38,7 @@ for i in range(cross_number):
                 if cross[i][j] == cross[x][y]:
                     cross_adjacency_matrix[i][x] = 1
 
-
-
+print("hahahaha")
 print(cross_adjacency_matrix)
 print("dsfa")
 print("dsfa")
