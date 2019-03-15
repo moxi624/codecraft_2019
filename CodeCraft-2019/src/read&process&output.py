@@ -7,7 +7,7 @@ print("hahahaha")
 print("hahahaha")
 
 # def input_txt(file_address):
-#     with open(file_address, "r") as f:
+#     with open(file_address, "r") as f::::::
 #         str = f.read()
 #         str = str.replace("(", "")
 #         str = str.replace(")", "")
