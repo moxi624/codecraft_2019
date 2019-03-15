@@ -6,7 +6,10 @@ with open("../config/car.txt","r") as f:
     str = f.read()
     str = str.replace("(", "")
     str = str.replace(")", "")
+    str = str.replace("\n", ",")
     str = str.lstrip('#qwertyuiopasdfghjklzxcvbnm,QWERTYUIOPASDFGHJKLZXCVBNM')
 
-
-car = pd.DataFrame(str)
+arr = str.split(',')
+car = np.array(arr)
+car = car.reshape(-1,5)
+print(car)
