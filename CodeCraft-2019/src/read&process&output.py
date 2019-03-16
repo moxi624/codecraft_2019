@@ -13,6 +13,7 @@ def input_txt(file_address):
     arr = str.split(',')
     Arr = np.array(arr)
     Arr = Arr.reshape(-1, 5)
+    Arr = Arr.astype(int)
     return Arr
 
 
