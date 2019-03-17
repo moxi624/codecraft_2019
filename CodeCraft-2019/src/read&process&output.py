@@ -2,6 +2,19 @@ import pandas as pd
 import numpy as np
 from numpy.random import rand
 
+answers=[]
+def output_txt(file_address, answers):   #将最终结果输出到answer.txt上
+    with open(file_address, "w") as f:
+        f.writelines("#(carId,StartTime,RoadId...)")
+        f.writelines("\n")
+        for j in answers:
+            datastr=str(j)
+            datastr=datastr.replace("[", "(")
+            datastr=datastr.replace("]", ")")
+            print(datastr)
+            f.writelines(datastr)
+            f.writelines("\n")
+
 def input_txt(file_address):
     with open(file_address, "r") as f:
         str = f.read()
