@@ -27,7 +27,7 @@ road_number = len(road)
 # 车的数量
 car_number = len(car)
 
-cross_adjacency_matrix = np.ones((cross_number, cross_number))
+cross_adjacency_matrix = np.ones((cross_number+1, cross_number+1))
 cross_adjacency_matrix = float('inf')*cross_adjacency_matrix
 # 构建路口的邻接矩阵(数值为距离，-1为不连通）
 for i in range(cross_number):
@@ -39,15 +39,22 @@ for i in range(cross_number):
                 if cross[i][j] == cross[x][y]:   # 找出相邻路口
                     for r in range(road_number):
                         if road[r][0] == cross[i][j] and i != x:
-                            cross_adjacency_matrix[i][x] = road[r][1]   # 获得路口之间距离
+                            if road[r][6] == 0 and road[r][5] == cross[i][0]:
+                                continue
+                            else:
+                                cross_adjacency_matrix[i+1][x+1] = road[r][1]   # 获得路口之间距离
 
 
 # print(cross_adjacency_matrix)
 # cam = pd.DataFrame(cross_adjacency_matrix)
 # cam.to_csv('cam.csv')
 
+# 最短距离字典
+shortest_distance={}
+
+
 # 用Dijkstra's Algorithm算法，计算出最短路径
-def Dijkstra(points, graph, start, end):
+def Dijkstra(points, graph, start, end, T):
     pre = [0] * (points + 1)  # 记录前驱
     vis = [0] * (points + 1)  # 记录节点遍历状态
     dis = [float('inf') for i in range(points + 1)]  # 保存最短距离
@@ -85,12 +92,15 @@ def Dijkstra(points, graph, start, end):
     mark = 0
     len -= 1
     while len >= 0:
-        roads.append(road[len]+1)
+        roads.append(road[len])
         len -= 1
-    print(str(start+1)+" 到 "+str(end+1))
-    print("最短距离：", dis[end],end=" ")
-    print("最短路径：", roads)
-
+    # print(str(start+1)+" 到 "+str(end+1))
+    # print("最短距离：", dis[end],end=" ")
+    # print("最短路径：", roads)
+    if T == 0:
+        shortest_distance[str(start) + '-' + str(end)] = roads
+    else:
+        shortest_distance[str(end) + '-' + str(start)] = roads[::-1]
 
 
 # 固定map图
@@ -98,7 +108,36 @@ def map():
     map = cross_adjacency_matrix
     for i in range(cross_number):
         for j in range(i+1, cross_number):
-            Dijkstra(cross_number-1, map, i, j)
+            Dijkstra(cross_number, map, i+1, j+1, 0)# 从小到大
+    map = cross_adjacency_matrix.T
+    for i in range(cross_number):
+        for j in range(i+1, cross_number):
+            Dijkstra(cross_number, map, i+1, j+1, 1)# 从大到小
+
 
 
 map()
+print(shortest_distance)
+
+# 路口->道路的字典
+cross_road={}
+for i in range(road_number):
+    if road[i][6] == 1:
+        cross_road[str(road[i][4]) + '-' + str(road[i][5])] = road[i][0]
+        cross_road[str(road[i][5]) + '-' + str(road[i][4])] = road[i][0]
+    else:
+        cross_road[str(road[i][4]) + '-' + str(road[i][5])] = road[i][0]
+# print(cross_road)
+
+answer = []
+# 生成每辆车的最短路径
+for i in range(car_number):
+     every_answer = []
+     every_answer.append(car[i][0])
+     every_answer.append(car[i][4])# 先处理成默认发车时间
+     walk = shortest_distance[str(car[i][1]) + '-' + str(car[i][2])]
+     for j in range(len(walk)-1):
+         every_answer.append(cross_road[str(walk[j]) + '-' + str(walk[j+1])])
+     answer.append(every_answer)
+
+print(answer)
