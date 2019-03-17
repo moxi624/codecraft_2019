@@ -99,6 +99,4 @@ def map():
     for i in range(cross_number):
         for j in range(i+1, cross_number):
             Dijkstra(cross_number-1, map, i, j)
-
-
 map()
