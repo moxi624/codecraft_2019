@@ -198,4 +198,16 @@ result = []
 for item in answerMap.values():
     result.append(item)
 
-print(result)
+def output_txt(file_address, answer):
+    with open(file_address, "w") as f:
+        f.writelines("#(carId,StartTime,RoadId...)")
+        f.writelines("\n")
+        for j in answer:
+            datastr=str(j)
+            datastr=datastr.replace("[", "(")
+            datastr=datastr.replace("]", ")")
+            print(datastr)
+            f.writelines(datastr)
+            f.writelines("\n")
+
+output_txt("../config/answer.txt", result)
