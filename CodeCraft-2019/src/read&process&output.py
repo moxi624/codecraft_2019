@@ -117,7 +117,7 @@ def map():
 
 
 map()
-print(shortest_distance)
+# print(shortest_distance)
 
 # 路口->道路的字典
 cross_road={}
