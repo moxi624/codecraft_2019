@@ -54,7 +54,7 @@ shortest_distance={}
 
 
 # 用Dijkstra's Algorithm算法，计算出最短路径
-def Dijkstra(points, graph, start, end, T):
+def Dijkstra(points, graph, start, end):
     pre = [0] * (points + 1)  # 记录前驱
     vis = [0] * (points + 1)  # 记录节点遍历状态
     dis = [float('inf') for i in range(points + 1)]  # 保存最短距离
@@ -94,13 +94,12 @@ def Dijkstra(points, graph, start, end, T):
     while len >= 0:
         roads.append(road[len])
         len -= 1
-    # print(str(start+1)+" 到 "+str(end+1))
-    # print("最短距离：", dis[end],end=" ")
-    # print("最短路径：", roads)
-    if T == 0:
-        shortest_distance[str(start) + '-' + str(end)] = roads
-    else:
-        shortest_distance[str(end) + '-' + str(start)] = roads[::-1]
+    print(str(start+1)+" 到 "+str(end+1))
+    print("最短距离：", dis[end],end=" ")
+    print("最短路径：", roads)
+
+    shortest_distance[str(start) + '-' + str(end)] = roads
+
 
 
 # 固定map图
@@ -108,11 +107,9 @@ def map():
     map = cross_adjacency_matrix
     for i in range(cross_number):
         for j in range(cross_number):
-            Dijkstra(cross_number, map, i+1, j+1, 0)# 从小到大
-    # map = cross_adjacency_matrix.T
-    # for i in range(cross_number):
-    #     for j in range(i+1, cross_number):
-    #         Dijkstra(cross_number, map, i+1, j+1, 1)# 从大到小
+            Dijkstra(cross_number, map, i+1, j+1)# 从小到大
+
+
 
 
 map()
