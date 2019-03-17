@@ -39,7 +39,10 @@ for i in range(cross_number):
                 if cross[i][j] == cross[x][y]:   # 找出相邻路口
                     for r in range(road_number):
                         if road[r][0] == cross[i][j] and i != x:
-                            cross_adjacency_matrix[i][x] = road[r][1]   # 获得路口之间距离
+                            if road[r][6] == 0 and road[r][5] == cross[i][0]:
+                                continue
+                            else:
+                                cross_adjacency_matrix[i][x] = road[r][1]   # 获得路口之间距离
 
 
 # print(cross_adjacency_matrix)
