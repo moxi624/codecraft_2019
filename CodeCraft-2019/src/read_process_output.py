@@ -142,75 +142,75 @@ for i in range(car_number):
 
 
 
-# # 定义字典，用于存储每个车的行驶路径
-# answerMap = {}
-# for item in answer:
-#     answerMap.setdefault(item[0], item)
-#
-# # 定义所有车辆起点数组
-# carStartingPoint = []
-# for i in range(car_number):
-#     # 定义标志位，判断是否包含该元素
-#     tag = 0
-#     for j in range(len(carStartingPoint)):
-#         if car[i][2] == carStartingPoint[j]:
-#             tag = 1
-#             break
-#     if tag == 0:
-#         carStartingPoint.append(car[i][2])
-#
-# # 定义Map，存储相同起点的车辆， key：起点   value：该起点的所有车辆
-# startintPointMap = {};
-# for i in range(len(carStartingPoint)):
-#     tempCarInfoArray = []
-#     for j in range(car_number):
-#         if carStartingPoint[i] == car[j][2]:
-#             tempCarInfoArray.append(car[j])
-#     startintPointMap.setdefault(carStartingPoint[i], tempCarInfoArray)
-#
-# # 定义系统调度时间
-# totalTIme = 3000
-#
-# # 定义每个时间片调度时间
-# step = int( totalTIme / startintPointMap.keys().__len__())
-#
-# planTime = 0
-# startMaxPlanTime = 0
-#
-#
-# # 获得每个分类的车辆出发时间片
-# for key,values in startintPointMap.items():
-#     # 第一次读取最大的出发时间
-#     if startMaxPlanTime == 0:
-#         for item in values:
-#             if item[4] > startMaxPlanTime:
-#                 startMaxPlanTime = item[4]
-#         planTime = startMaxPlanTime
-#     else:
-#         planTime += step
-#
-#     for item in values:
-#         # 得到车辆的ID
-#         carId = item[0]
-#         car = answerMap.get(carId)
-#         # 修改车辆的planTime
-#         car[1] = planTime
-#         answerMap.setdefault(carId, car)
-#
-# result = []
-# for item in answerMap.values():
-#     result.append(item)
-#
-# def output_txt(file_address, answer):
-#     with open(file_address, "w") as f:
-#         f.writelines("#(carId,StartTime,RoadId...)")
-#         f.writelines("\n")
-#         for j in answer:
-#             datastr=str(j)
-#             datastr=datastr.replace("[", "(")
-#             datastr=datastr.replace("]", ")")
-#             print(datastr)
-#             f.writelines(datastr)
-#             f.writelines("\n")
-#
-# output_txt("../config/answer.txt", result)
+# 定义字典，用于存储每个车的行驶路径
+answerMap = {}
+for item in answer:
+    answerMap.setdefault(item[0], item)
+
+# 定义所有车辆起点数组
+carStartingPoint = []
+for i in range(car_number):
+    # 定义标志位，判断是否包含该元素
+    tag = 0
+    for j in range(len(carStartingPoint)):
+        if car[i][2] == carStartingPoint[j]:
+            tag = 1
+            break
+    if tag == 0:
+        carStartingPoint.append(car[i][2])
+
+# 定义Map，存储相同起点的车辆， key：起点   value：该起点的所有车辆
+startintPointMap = {};
+for i in range(len(carStartingPoint)):
+    tempCarInfoArray = []
+    for j in range(car_number):
+        if carStartingPoint[i] == car[j][2]:
+            tempCarInfoArray.append(car[j])
+    startintPointMap.setdefault(carStartingPoint[i], tempCarInfoArray)
+
+# 定义系统调度时间
+totalTIme = 3000
+
+# 定义每个时间片调度时间
+step = int( totalTIme / startintPointMap.keys().__len__())
+
+planTime = 0
+startMaxPlanTime = 0
+
+
+# 获得每个分类的车辆出发时间片
+for key,values in startintPointMap.items():
+    # 第一次读取最大的出发时间
+    if startMaxPlanTime == 0:
+        for item in values:
+            if item[4] > startMaxPlanTime:
+                startMaxPlanTime = item[4]
+        planTime = startMaxPlanTime
+    else:
+        planTime += step
+
+    for item in values:
+        # 得到车辆的ID
+        carId = item[0]
+        car = answerMap.get(carId)
+        # 修改车辆的planTime
+        car[1] = planTime
+        answerMap.setdefault(carId, car)
+
+result = []
+for item in answerMap.values():
+    result.append(item)
+
+def output_txt(file_address, answer):
+    with open(file_address, "w") as f:
+        f.writelines("#(carId,StartTime,RoadId...)")
+        f.writelines("\n")
+        for j in answer:
+            datastr=str(j)
+            datastr=datastr.replace("[", "(")
+            datastr=datastr.replace("]", ")")
+            print(datastr)
+            f.writelines(datastr)
+            f.writelines("\n")
+
+output_txt("../config/answer.txt", result)
