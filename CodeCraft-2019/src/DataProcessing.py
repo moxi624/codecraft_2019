@@ -42,7 +42,9 @@ for i in range(cross_number):
                             if road[r][6] == 0 and road[r][5] == cross[i][0]:
                                 continue
                             else:
-                                cross_adjacency_matrix[i+1][x+1] = road[r][1]   # 获得路口之间距离
+                                cross_adjacency_matrix[i + 1][x + 1] = (
+                                            road[r][1] / ((0.95) * road[r][2] * (road[r][3])))  # 获得路口之间距离
+                            # 重新评估权重2019-3-18
 
 
 # print(cross_adjacency_matrix)
@@ -54,7 +56,7 @@ shortest_distance={}
 
 
 # 用Dijkstra's Algorithm算法，计算出最短路径
-def Dijkstra(points, graph, start, end, T):
+def Dijkstra(points, graph, start, end):
     pre = [0] * (points + 1)  # 记录前驱
     vis = [0] * (points + 1)  # 记录节点遍历状态
     dis = [float('inf') for i in range(points + 1)]  # 保存最短距离
@@ -97,22 +99,19 @@ def Dijkstra(points, graph, start, end, T):
     # print(str(start+1)+" 到 "+str(end+1))
     # print("最短距离：", dis[end],end=" ")
     # print("最短路径：", roads)
-    if T == 0:
-        shortest_distance[str(start) + '-' + str(end)] = roads
-    else:
-        shortest_distance[str(end) + '-' + str(start)] = roads[::-1]
+
+    shortest_distance[str(start) + '-' + str(end)] = roads
+
 
 
 # 固定map图
 def map():
     map = cross_adjacency_matrix
     for i in range(cross_number):
-        for j in range(i+1, cross_number):
-            Dijkstra(cross_number, map, i+1, j+1, 0)# 从小到大
-    map = cross_adjacency_matrix.T
-    for i in range(cross_number):
-        for j in range(i+1, cross_number):
-            Dijkstra(cross_number, map, i+1, j+1, 1)# 从大到小
+        for j in range(cross_number):
+            Dijkstra(cross_number, map, i+1, j+1)# 从小到大
+
+
 
 
 map()
@@ -139,44 +138,54 @@ for i in range(car_number):
          every_answer.append(cross_road[str(walk[j]) + '-' + str(walk[j+1])])
      answer.append(every_answer)
 
+
+
+
 # 定义字典，用于存储每个车的行驶路径
 answerMap = {}
 for item in answer:
     answerMap.setdefault(item[0], item)
 
 # 定义所有车辆起点数组
-carStartingPoint = []
+carEndPoint = []
 for i in range(car_number):
     # 定义标志位，判断是否包含该元素
     tag = 0
-    for j in range(len(carStartingPoint)):
-        if car[i][2] == carStartingPoint[j]:
+    for j in range(len(carEndPoint)):
+        if car[i][2] == carEndPoint[j]:
             tag = 1
             break
     if tag == 0:
-        carStartingPoint.append(car[i][2])
+        carEndPoint.append(car[i][2])
 
-# 定义Map，存储相同起点的车辆， key：起点   value：该起点的所有车辆
-startintPointMap = {};
-for i in range(len(carStartingPoint)):
+# 对终点数组进行排序
+carEndPoint = sorted(carEndPoint)
+
+# 定义Map，存储相同终点的车辆， key：起点   value：该终点的所有车辆
+endPointMap = {};
+for i in range(0, len(carEndPoint), 2):
     tempCarInfoArray = []
     for j in range(car_number):
-        if carStartingPoint[i] == car[j][2]:
+        # 将标号相邻的两个
+        if carEndPoint[i] == car[j][2]:
             tempCarInfoArray.append(car[j])
-    startintPointMap.setdefault(carStartingPoint[i], tempCarInfoArray)
+        if i+1 < len(carEndPoint) and carEndPoint[i+1] == car[j][2]:
+            tempCarInfoArray.append(car[j])
+
+        endPointMap.setdefault(int(carEndPoint[i]/2), tempCarInfoArray)
 
 # 定义系统调度时间
-totalTIme = 3000
+totalTIme = 500
 
 # 定义每个时间片调度时间
-step = int( totalTIme / startintPointMap.keys().__len__())
+step = int( totalTIme / endPointMap.keys().__len__())
 
 planTime = 0
 startMaxPlanTime = 0
 
 
 # 获得每个分类的车辆出发时间片
-for key,values in startintPointMap.items():
+for key,values in endPointMap.items():
     # 第一次读取最大的出发时间
     if startMaxPlanTime == 0:
         for item in values:
@@ -186,16 +195,64 @@ for key,values in startintPointMap.items():
     else:
         planTime += step
 
+    # plan A 并发发车
+    # for item in values:
+    #     carId = item[0]
+    #     car = answerMap.get(carId)
+    #     car[1] = planTime
+    #     answerMap.setdefault(carId, car)
+
+    # planB 分片发车
+    #  对每个时间片，在进行切割
+    # itemPlanTime = int(step / len(values))
+    # for item in values:
+    #     # 得到车辆的ID
+    #     carId = item[0]
+    #     car = answerMap.get(carId)
+    #     # 修改车辆的planTime
+    #     car[1] = planTime + itemPlanTime
+    #     answerMap.setdefault(carId, car)
+
+    # planC 快车先行
+    # 得到所有车的速度数组
+    speedArray = []
+    maxSpeed = 0
+    for item in values:
+        carSpeed = item[3]
+        flag = 0
+        for tempSpeed in speedArray:
+            if tempSpeed == carSpeed:
+                flag = 1
+        if flag == 0:
+            speedArray.append(carSpeed)
+
+    for speed in speedArray:
+        if speed > maxSpeed:
+            maxSpeed = speed
     for item in values:
         # 得到车辆的ID
         carId = item[0]
+        carSpeed = item[3]
         car = answerMap.get(carId)
-        # 修改车辆的planTime
-        car[1] = planTime
+        # 修改车辆的planTime   当前时间片 + 最高速度 - 车辆当前速度
+        # 这样能够让速度快的车辆，优先先行，慢车就会排在快车的后面
+        car[1] = planTime + maxSpeed - carSpeed
         answerMap.setdefault(carId, car)
 
 result = []
 for item in answerMap.values():
     result.append(item)
 
-print(result)
+def output_txt(file_address, answer):
+    with open(file_address, "w") as f:
+        f.writelines("#(carId,StartTime,RoadId...)")
+        f.writelines("\n")
+        for j in answer:
+            datastr=str(j)
+            datastr=datastr.replace("[", "(")
+            datastr=datastr.replace("]", ")")
+            # print(datastr)
+            f.writelines(datastr)
+            f.writelines("\n")
+
+output_txt("../config/answer.txt", result)
