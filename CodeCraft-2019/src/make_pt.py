@@ -16,6 +16,7 @@ def input_txt(file_address):
     Arr = Arr.astype(int)
     return Arr
 road = input_txt("../1-map-training-2/road.txt").reshape(-1, 7)
+car = input_txt("../1-map-training-2/car.txt").reshape(-1, 5)
 #print(road)
 
 for i in road:
@@ -25,7 +26,7 @@ for i in road:
     else:
         G.add_edge(i[4], i[5])
 
-print(G.nodes())
+
 
 nx.draw_spectral(G, with_labels=True,)
 plt.show()
