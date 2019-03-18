@@ -154,9 +154,11 @@ def generating_path(path,node):
             every_answer.append(cross_road[str(walk[j]) + '-' + str(walk[j + 1])])
         path.append(every_answer)
 
-
+# 正常的
 generating_path(answer, shortest_distance)
+#速度最快的
 generating_path(answer_high_speed, high_speed)
+#速度最慢的
 generating_path(answer_slow_speed, slow_speed)
 
 # print(answer)
