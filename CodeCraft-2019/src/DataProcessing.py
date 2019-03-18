@@ -42,8 +42,12 @@ for i in range(cross_number):
                             if road[r][6] == 0 and road[r][5] == cross[i][0]:
                                 continue
                             else:
-                                cross_adjacency_matrix[i + 1][x + 1] = (
-                                            road[r][1] / ((0.95) * road[r][2] * (road[r][3])))  # 获得路口之间距离
+                                if road[r][6] == 0:
+                                    cross_adjacency_matrix[i + 1][x + 1] = ((road[r][1]) / (
+                                                (0.95) * road[r][2] * (road[r][3]))) / 2  # 获得路口之间距离
+                                else:
+                                    cross_adjacency_matrix[i + 1][x + 1] = (
+                                                (road[r][1]) / ((0.95) * road[r][2] * (road[r][3])))
                             # 重新评估权重2019-3-18
 
 
@@ -163,16 +167,14 @@ carEndPoint = sorted(carEndPoint)
 
 # 定义Map，存储相同终点的车辆， key：起点   value：该终点的所有车辆
 endPointMap = {};
-for i in range(0, len(carEndPoint), 2):
+for i in range(len(carEndPoint)):
     tempCarInfoArray = []
     for j in range(car_number):
         # 将标号相邻的两个
         if carEndPoint[i] == car[j][2]:
             tempCarInfoArray.append(car[j])
-        if i+1 < len(carEndPoint) and carEndPoint[i+1] == car[j][2]:
-            tempCarInfoArray.append(car[j])
+    endPointMap.setdefault(i, tempCarInfoArray)
 
-        endPointMap.setdefault(int(carEndPoint[i]/2), tempCarInfoArray)
 
 # 定义系统调度时间
 totalTIme = 500
