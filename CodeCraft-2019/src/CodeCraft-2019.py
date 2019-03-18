@@ -201,7 +201,7 @@ def main():
         startintPointMap.setdefault(carStartingPoint[i], tempCarInfoArray)
 
     # 定义系统调度时间
-    totalTIme = 10000
+    totalTIme = 790
 
     # 定义每个时间片调度时间
     step = int(totalTIme / startintPointMap.keys().__len__())
@@ -220,17 +220,52 @@ def main():
         else:
             planTime += step
 
-        # 对每个时间片，在进行切割
-        itemPlanTime = int(step / len(values))
+        # plan A 并发发车
+        # for item in values:
+        #     carId = item[0]
+        #     car = answerMap.get(carId)
+        #     car[1] = planTime
+        #     answerMap.setdefault(carId, car)
 
+        # planB 分片发车
+        #  对每个时间片，在进行切割
+        # itemPlanTime = int(step / len(values))
+        #
+        # for item in values:
+        #     # 得到车辆的ID
+        #     carId = item[0]
+        #     car = answerMap.get(carId)
+        #     # 修改车辆的planTime
+        #     planTime = planTime + itemPlanTime
+        #     car[1] = planTime
+        #     answerMap.setdefault(carId, car)
+
+        # planC 快车先行
+        # 得到所有车的速度数组
+        speedArray = []
+        maxSpeed = 0
+        for item in values:
+            carSpeed = item[3]
+            flag = 0
+            for tempSpeed in speedArray:
+                if tempSpeed == carSpeed:
+                    flag = 1
+            if flag == 0:
+                speedArray.append(carSpeed)
+
+        for speed in speedArray:
+            if speed > maxSpeed:
+                maxSpeed = speed
         for item in values:
             # 得到车辆的ID
             carId = item[0]
+            carSpeed = item[3]
             car = answerMap.get(carId)
-            # 修改车辆的planTime
-            planTime = planTime + itemPlanTime
-            car[1] = planTime
+            # 修改车辆的planTime   当前时间片 + 最高速度 - 车辆当前速度
+            # 这样能够让速度快的车辆，优先先行，慢车就会排在快车的后面
+            car[1] = planTime + maxSpeed - carSpeed
             answerMap.setdefault(carId, car)
+
 
     result = []
     for item in answerMap.values():
