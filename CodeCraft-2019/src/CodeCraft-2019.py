@@ -141,8 +141,8 @@ def main():
                                 if road[r][6] == 0 and road[r][5] == cross[i][0]:
                                     continue
                                 else:
-                                    cross_adjacency_matrix[i+1][x+1] = road[r][1]   # 获得路口之间距离
-
+                                    cross_adjacency_matrix[i+1][x+1] = (road[r][1]/((0.95)*road[r][2]*(road[r][3])))   # 获得路口之间距离
+    #重新评估权重2019-3-18
 
     # print(cross_adjacency_matrix)
     # cam = pd.DataFrame(cross_adjacency_matrix)
@@ -179,7 +179,7 @@ def main():
     for item in answer:
         answerMap.setdefault(item[0], item)
 
-    # 定义所有车辆起点数组
+    # 定义所有车辆终点数组
     carStartingPoint = []
     for i in range(car_number):
         # 定义标志位，判断是否包含该元素
@@ -191,7 +191,8 @@ def main():
         if tag == 0:
             carStartingPoint.append(car[i][2])
 
-    # 定义Map，存储相同起点的车辆， key：起点   value：该起点的所有车辆
+
+    # 定义Map，存储相同终点的车辆， key：终点   value：该起点的所有车辆
     startintPointMap = {};
     for i in range(len(carStartingPoint)):
         tempCarInfoArray = []
@@ -201,7 +202,7 @@ def main():
         startintPointMap.setdefault(carStartingPoint[i], tempCarInfoArray)
 
     # 定义系统调度时间
-    totalTIme = 10000
+    totalTIme = 790
 
     # 定义每个时间片调度时间
     step = int(totalTIme / startintPointMap.keys().__len__())
@@ -220,17 +221,52 @@ def main():
         else:
             planTime += step
 
-        # 对每个时间片，在进行切割
-        itemPlanTime = int(step / len(values))
+        # plan A 并发发车
+        # for item in values:
+        #     carId = item[0]
+        #     car = answerMap.get(carId)
+        #     car[1] = planTime
+        #     answerMap.setdefault(carId, car)
 
+        # planB 分片发车
+        #  对每个时间片，在进行切割
+        # itemPlanTime = int(step / len(values))
+        #
+        # for item in values:
+        #     # 得到车辆的ID
+        #     carId = item[0]
+        #     car = answerMap.get(carId)
+        #     # 修改车辆的planTime
+        #     planTime = planTime + itemPlanTime
+        #     car[1] = planTime
+        #     answerMap.setdefault(carId, car)
+
+        # planC 快车先行
+        # 得到所有车的速度数组
+        speedArray = []
+        maxSpeed = 0
+        for item in values:
+            carSpeed = item[3]
+            flag = 0
+            for tempSpeed in speedArray:
+                if tempSpeed == carSpeed:
+                    flag = 1
+            if flag == 0:
+                speedArray.append(carSpeed)
+
+        for speed in speedArray:
+            if speed > maxSpeed:
+                maxSpeed = speed
         for item in values:
             # 得到车辆的ID
             carId = item[0]
+            carSpeed = item[3]
             car = answerMap.get(carId)
-            # 修改车辆的planTime
-            planTime = planTime + itemPlanTime
-            car[1] = planTime
+            # 修改车辆的planTime   当前时间片 + 最高速度 - 车辆当前速度
+            # 这样能够让速度快的车辆，优先先行，慢车就会排在快车的后面
+            car[1] = planTime + maxSpeed - carSpeed
             answerMap.setdefault(carId, car)
+
 
     result = []
     for item in answerMap.values():
