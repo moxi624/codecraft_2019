@@ -111,6 +111,7 @@ def map():
 
 
 
+
 map()
 print(shortest_distance)
 
@@ -134,6 +135,9 @@ for i in range(car_number):
      for j in range(len(walk)-1):
          every_answer.append(cross_road[str(walk[j]) + '-' + str(walk[j+1])])
      answer.append(every_answer)
+
+
+
 
 # 定义字典，用于存储每个车的行驶路径
 answerMap = {}
