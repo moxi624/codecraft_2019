@@ -179,7 +179,7 @@ def main():
     for item in answer:
         answerMap.setdefault(item[0], item)
 
-    # 定义所有车辆起点数组
+    # 定义所有车辆终点数组
     carStartingPoint = []
     for i in range(car_number):
         # 定义标志位，判断是否包含该元素
@@ -191,7 +191,8 @@ def main():
         if tag == 0:
             carStartingPoint.append(car[i][2])
 
-    # 定义Map，存储相同起点的车辆， key：起点   value：该起点的所有车辆
+
+    # 定义Map，存储相同终点的车辆， key：终点   value：该起点的所有车辆
     startintPointMap = {};
     for i in range(len(carStartingPoint)):
         tempCarInfoArray = []
