@@ -19,6 +19,11 @@ road = input_txt("../1-map-training-2/road.txt").reshape(-1, 7)
 car = input_txt("../1-map-training-2/car.txt").reshape(-1, 5)
 #print(road)
 
+car_from = set()
+for item in car:
+    car_from.add(item[2])
+print(car_from)
+
 for i in road:
     if i[6] == 1:
         G.add_edge(i[4], i[5])
@@ -28,8 +33,8 @@ for i in road:
 
 
 
-nx.draw_spectral(G, with_labels=True,)
-plt.show()
+# nx.draw_spectral(G, with_labels=True,)
+# plt.show()
 
 
 
