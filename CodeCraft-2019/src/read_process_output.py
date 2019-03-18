@@ -42,7 +42,9 @@ for i in range(cross_number):
                             if road[r][6] == 0 and road[r][5] == cross[i][0]:
                                 continue
                             else:
-                                cross_adjacency_matrix[i+1][x+1] = road[r][1]   # 获得路口之间距离
+                                cross_adjacency_matrix[i + 1][x + 1] = (
+                                            road[r][1] / ((0.95) * road[r][2] * (road[r][3])))  # 获得路口之间距离
+                            # 重新评估权重2019-3-18
 
 
 # print(cross_adjacency_matrix)

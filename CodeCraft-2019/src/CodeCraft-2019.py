@@ -202,7 +202,7 @@ def main():
         startintPointMap.setdefault(carStartingPoint[i], tempCarInfoArray)
 
     # 定义系统调度时间
-    totalTIme = 790
+    totalTIme = 400
 
     # 定义每个时间片调度时间
     step = int(totalTIme / startintPointMap.keys().__len__())
