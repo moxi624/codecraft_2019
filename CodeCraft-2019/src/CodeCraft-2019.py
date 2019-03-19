@@ -214,7 +214,7 @@ def main():
     for item in answer_slow_speed:
         answerSlowMap.setdefault(item[0], item)
 
-    # 定义所有车辆起点数组
+    # 定义所有车辆终点数组
     carEndPoint = []
     for i in range(car_number):
         # 定义标志位，判断是否包含该元素
@@ -226,11 +226,23 @@ def main():
         if tag == 0:
             carEndPoint.append(car[i][2])
 
-    # 对终点数组进行排序
-    carEndPoint = sorted(carEndPoint)
+    # 定义所有车辆起点数组
+    carStartPoint = []
+    for i in range(car_number):
+        # 定义标志位，判断是否包含该元素
+        tag = 0
+        for j in range(len(carStartPoint)):
+            if car[i][1] == carStartPoint[j]:
+                tag = 1
+                break
+        if tag == 0:
+            carStartPoint.append(car[i][1])
 
-    # 定义Map，存储相同终点的车辆， key：起点   value：该终点的所有车辆
-    endPointMap = {};
+    # 对终点数组进行排序
+    # carEndPoint = sorted(carEndPoint)
+
+    # 定义Map，存储相同终点的车辆， key：终点   value：该终点的所有车辆
+    endPointMap = {}
     for i in range(len(carEndPoint)):
         tempCarInfoArray = []
         for j in range(car_number):
@@ -238,8 +250,17 @@ def main():
                 tempCarInfoArray.append(car[j])
         endPointMap.setdefault(i, tempCarInfoArray)
 
+    # 定义Map，存储相同起点的车辆， key：起点   value：该起点的所有车辆
+    startPointMap = {}
+    for i in range(len(carStartPoint)):
+        tempCarInfoArray = []
+        for j in range(car_number):
+            if carStartPoint[i] == car[j][2]:
+                tempCarInfoArray.append(car[j])
+            startPointMap.setdefault(carStartPoint[i], tempCarInfoArray)
+
     # 定义系统调度时间
-    totalTIme = 500
+    totalTIme = 450
 
     # 定义每个时间片调度时间
     # step = int(totalTIme / endPointMap.keys().__len__())
@@ -247,14 +268,42 @@ def main():
     planTime = 0
     startMaxPlanTime = 0
 
+    # 已经出发的车辆
+    haveStartCar = []
+
     # 获得每个分类的车辆出发时间片
     for key, values in endPointMap.items():
+
+        # 把该分类下的车取出来，和以该Key作为起点的车，取出来，合并成一个新的数组
+        startPointCarList = startPointMap.get(key)
+        mergeCarList = []
+        if startPointCarList != None:
+            mergeCarList = values + startPointCarList
+        else:
+            mergeCarList = values
+
+        # 将要出发的车辆列表
+        willStartCar = []
+
+        # 判断该分类区间的车，是否有已经出发的车辆
+        for item in mergeCarList:
+            isStart = 0
+            for startClassItem in haveStartCar:
+                if item[0] == startClassItem:
+                    isStart = 1
+                    break
+            if isStart == 0:
+                willStartCar.append(item)
+
+        # 将马上要出发的车，存入发车列表
+        for car in willStartCar:
+            haveStartCar.append(car[0])
 
         # 时间片大小进一步划分（根据驶入当前终点的车辆数，动态改变 ）  （总分片/ 总车辆 ）* 当前点车辆
         step = int((totalTIme / car_number) * len(values))
         # 太小的时间片，给一个默认值
-        if step < 5:
-            step = 5
+        if step < 4:
+            step = step + 2
         # 太大的时间片，是否也设置一个最大值呢？
 
         # 第一次读取最大的出发时间
@@ -290,7 +339,7 @@ def main():
         # 得到所有车的速度数组
         speedArray = []
         maxSpeed = 0
-        for item in values:
+        for item in willStartCar:
             carSpeed = item[3]
             flag = 0
             for tempSpeed in speedArray:
