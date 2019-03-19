@@ -195,47 +195,60 @@ def main():
     answer_high_speed = []  # 速度块的路径
     answer_slow_speed = []  # 速度慢的路径
     # 生成每辆车的最短路径
-    generating_path(car_number, answer, shortest_distance, cross_road)
+    # generating_path(car_number, answer, shortest_distance, cross_road)
     generating_path(car_number, answer_high_speed, high_speed, cross_road)
     generating_path(car_number, answer_slow_speed, slow_speed, cross_road)
 
     # 定义字典，用于存储每个车的行驶路径
     answerMap = {}
-    for item in answer:
-        answerMap.setdefault(item[0], item)
+    # for item in answer:
+    #     answerMap.setdefault(item[0], item)
 
-    # 定义所有车辆终点数组
-    carStartingPoint = []
+    # 定义字典，用于存储每个车的高速行驶路径
+    answerHighMap = {}
+    for item in answer_high_speed:
+        answerHighMap.setdefault(item[0], item)
+
+    # 定义字典，用于存储每个车的低速行驶路径
+    answerSlowMap = {}
+    for item in answer_slow_speed:
+        answerSlowMap.setdefault(item[0], item)
+
+    # 定义所有车辆起点数组
+    carEndPoint = []
     for i in range(car_number):
         # 定义标志位，判断是否包含该元素
         tag = 0
-        for j in range(len(carStartingPoint)):
-            if car[i][2] == carStartingPoint[j]:
+        for j in range(len(carEndPoint)):
+            if car[i][2] == carEndPoint[j]:
                 tag = 1
                 break
         if tag == 0:
-            carStartingPoint.append(car[i][2])
+            carEndPoint.append(car[i][2])
 
-    # 定义Map，存储相同终点的车辆， key：终点   value：该起点的所有车辆
-    startintPointMap = {}
-    for i in range(len(carStartingPoint)):
+    # 对终点数组进行排序
+    carEndPoint = sorted(carEndPoint)
+
+    # 定义Map，存储相同终点的车辆， key：起点   value：该终点的所有车辆
+    endPointMap = {};
+    for i in range(len(carEndPoint)):
         tempCarInfoArray = []
         for j in range(car_number):
-            if carStartingPoint[i] == car[j][2]:
+            if carEndPoint[i] == car[j][2]:
                 tempCarInfoArray.append(car[j])
-        startintPointMap.setdefault(carStartingPoint[i], tempCarInfoArray)
+        endPointMap.setdefault(i, tempCarInfoArray)
 
     # 定义系统调度时间
-    totalTIme = 450
+    totalTIme = 550
 
     # 定义每个时间片调度时间
-    step = int(totalTIme / startintPointMap.keys().__len__())
+    step = int(totalTIme / endPointMap.keys().__len__())
 
     planTime = 0
     startMaxPlanTime = 0
 
     # 获得每个分类的车辆出发时间片
-    for key, values in startintPointMap.items():
+    for key, values in endPointMap.items():
         # 第一次读取最大的出发时间
         if startMaxPlanTime == 0:
             for item in values:
@@ -281,11 +294,20 @@ def main():
         for speed in speedArray:
             if speed > maxSpeed:
                 maxSpeed = speed
+        halfMaxSpeed = int(maxSpeed / 2)
         for item in values:
             # 得到车辆的ID
             carId = item[0]
             carSpeed = item[3]
-            car = answerMap.get(carId)
+
+            # 对速度划分为两部分，低速车走低速车道，高速车走高速车道（这里低速和高速指的是权值）
+            if halfMaxSpeed > carSpeed:
+                # 走快速车道
+                car = answerHighMap.get(carId)
+            else:
+                # 走低速车道
+                car = answerSlowMap.get(carId)
+
             # 修改车辆的planTime   当前时间片 + 最高速度 - 车辆当前速度
             # 这样能够让速度快的车辆，优先先行，慢车就会排在快车的后面
             car[1] = planTime + maxSpeed - carSpeed
