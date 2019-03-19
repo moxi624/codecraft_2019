@@ -16,10 +16,18 @@ def input_txt(file_address):
     Arr = np.array(arr)
     Arr = Arr.astype(int)
     return Arr
-road = input_txt("../1-map-training-1/road.txt").reshape(-1, 7)
-car = input_txt("../1-map-training-1/car.txt").reshape(-1, 5)
+
 
 #以添加边的形式画图
+
+road = input_txt("../1-map-training-2/road.txt").reshape(-1, 7)
+car = input_txt("../1-map-training-2/car.txt").reshape(-1, 5)
+#print(road)
+
+car_from = set()
+for item in car:
+    car_from.add(item[2])
+print(car_from)
 
 for i in road:
     if i[6] == 1:
@@ -27,6 +35,7 @@ for i in road:
         G.add_edge(i[5], i[4])
     else:
         G.add_edge(i[4], i[5])
+
 
 nx.draw_spectral(G, with_labels=True, node_color='y')
 print(G.nodes())
