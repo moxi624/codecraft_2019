@@ -118,15 +118,15 @@ def Dijkstra(points, graph, start, end, dictionary):
 
 
 # 固定map图
-def map():
-    for i in range(cross_number):
-        for j in range(cross_number):
-            Dijkstra(cross_number, cross_adjacency_matrix, i + 1, j + 1, shortest_distance)  # 普通权重
-            Dijkstra(cross_number, cross_adjacency_high_speed, i + 1, j + 1, high_speed)  # 速度快
-            Dijkstra(cross_number, cross_adjacency_slow_speed, i + 1, j + 1, slow_speed)  # 速度慢
+def map(number, matrix0, matrix1, matrix2):
+    for i in range(number):
+        for j in range(number):
+            Dijkstra(number, matrix0, i + 1, j + 1, shortest_distance)  # 普通权重
+            Dijkstra(number, matrix1, i + 1, j + 1, high_speed)  # 速度快
+            Dijkstra(number, matrix2, i + 1, j + 1, slow_speed)  # 速度慢
 
 
-map()
+map(cross_number, cross_adjacency_matrix, cross_adjacency_high_speed, cross_adjacency_slow_speed)
 # print(shortest_distance)
 # print(high_speed)
 # print((slow_speed))
