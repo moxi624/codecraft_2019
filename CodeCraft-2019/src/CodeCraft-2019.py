@@ -32,13 +32,14 @@ def output_txt(file_address, answer):
             f.writelines("\n")
 
 
-# 最短距离字典
+# 最短距离节点路径字典
 shortest_distance = {}
-# 速度最快字典
+# 速度最快节点路径字典
 high_speed = {}
-# 速度慢字典
+# 速度慢节点路径字典
 slow_speed = {}
-
+#频率低节点路径字典
+low_frequency = {}
 
 # 用Dijkstra's Algorithm算法，计算出最短路径
 def Dijkstra(points, graph, start, end, dictionary):
@@ -89,20 +90,27 @@ def Dijkstra(points, graph, start, end, dictionary):
 
 
 # 固定map图
-def map(cross_number, matrix0, matrix1, matrix2):
+def map(cross_number, matrix, dictionary):
     for i in range(cross_number):
         for j in range(cross_number):
-            Dijkstra(cross_number, matrix0, i + 1, j + 1, shortest_distance)  # 普通权重
-            Dijkstra(cross_number, matrix1, i + 1, j + 1, high_speed)  # 速度快
-            Dijkstra(cross_number, matrix2, i + 1, j + 1, slow_speed)  # 速度慢
+            Dijkstra(cross_number, matrix, i + 1, j + 1, dictionary)  # 普通权重
 
 
-def generating_path(car_number, path, node, cross_road):
+
+def frequency(cross_number):
+    # 记录节点使用的频率
+    global count_cross_frequency
+    count_cross_frequency = np.zeros(cross_number + 1)  # 以1作为起始位置
+    return count_cross_frequency
+
+
+def generating_path(car_number, path, node, cross_road, count_cross_frequency):  # node:生成车辆的节点路径
     for i in range(car_number):
         every_answer = [car[i][0], car[i][4]]
         walk = node[str(car[i][1]) + '-' + str(car[i][2])]
         for j in range(len(walk) - 1):
-            every_answer.append(cross_road[str(walk[j]) + '-' + str(walk[j + 1])])
+            count_cross_frequency[walk[j]] += 1
+            every_answer.append(cross_road[str(walk[j]) + '-' + str(walk[j + 1])])  # 将2节点通过字典转化为中间的道路ID
         path.append(every_answer)
 
 
@@ -150,12 +158,17 @@ def main():
     # 车的数量
     car_number = len(car)
 
+    frequency(cross_number)#初始化count_cross_frequency
+
     cross_adjacency_matrix = np.ones((cross_number + 1, cross_number + 1))
     cross_adjacency_matrix = float('inf') * cross_adjacency_matrix
     cross_adjacency_high_speed = np.ones((cross_number + 1, cross_number + 1))
     cross_adjacency_high_speed = float('inf') * cross_adjacency_high_speed
     cross_adjacency_slow_speed = np.ones((cross_number + 1, cross_number + 1))
     cross_adjacency_slow_speed = float('inf') * cross_adjacency_slow_speed
+    cross_adjacency_infrequent = np.ones((cross_number + 1, cross_number + 1))
+    cross_adjacency_infrequent = float('inf') * cross_adjacency_infrequent
+
     # 构建路口的邻接矩阵(数值为距离，-1为不连通）
     for i in range(cross_number):
         for j in range(1, 5):
@@ -170,17 +183,21 @@ def main():
                                     continue
                                 else:
                                     cross_adjacency_matrix[i + 1][x + 1] = (
-                                                road[r][1] / ((0.95) * road[r][2] * (road[r][3])))  # 获得路口之间距离
+                                            road[r][1] / (0.95 * road[r][2] * (road[r][3])))  # 获得路口之间距离
                                     cross_adjacency_high_speed[i + 1][x + 1] = (
-                                            10 / ((1.5) * road[r][2] * (road[r][3])))  # 速度块
+                                            10 / (1.5 * road[r][2] * (road[r][3])))  # 速度块
                                     cross_adjacency_slow_speed[i + 1][x + 1] = (road[r][2] / (road[r][3]))  # 速度慢
+                                    cross_adjacency_infrequent[i + 1][x + 1] = count_cross_frequency[i + 1]  # 行驶次数最少
     # 重新评估权重2019-3-18
-
     # print(cross_adjacency_matrix)
+    # print(cross_adjacency_infrequent)
     # cam = pd.DataFrame(cross_adjacency_matrix)
     # cam.to_csv('cam.csv')
 
-    map(cross_number, cross_adjacency_matrix, cross_adjacency_high_speed, cross_adjacency_slow_speed)
+    # 生成经过cross的路线
+    # map(cross_number, cross_adjacency_matrix,shortest_distance)#普通路线
+    map(cross_number, cross_adjacency_high_speed, high_speed)  # 速度最快路线
+    map(cross_number, cross_adjacency_slow_speed, slow_speed)  # 速度最快路线
 
     # 路口->道路的字典
     cross_road = {}
@@ -194,10 +211,30 @@ def main():
     answer = []  # 普通路径
     answer_high_speed = []  # 速度块的路径
     answer_slow_speed = []  # 速度慢的路径
-    # 生成每辆车的最短路径
-    # generating_path(car_number, answer, shortest_distance, cross_road)
-    generating_path(car_number, answer_high_speed, high_speed, cross_road)
-    generating_path(car_number, answer_slow_speed, slow_speed, cross_road)
+    answer_low_frequency = []  # 频率低的路径
+    # 生成每辆车的road路径
+    # generating_path(car_number, answer, shortest_distance, cross_road,,cross_number)#普通路线
+    generating_path(car_number, answer_high_speed, high_speed, cross_road, count_cross_frequency)  # 速度最快路线
+    generating_path(car_number, answer_slow_speed, slow_speed, cross_road, count_cross_frequency)  # 速度最快路线
+
+    ##############################################################################################
+    for i in range(cross_number):
+        for j in range(1, 5):
+            if cross[i][j] == -1:
+                continue
+            for x in range(cross_number):
+                for y in range(1, 5):
+                    if cross[i][j] == cross[x][y]:  # 找出相邻路口
+                        for r in range(road_number):
+                            if road[r][0] == cross[i][j] and i != x:
+                                if road[r][6] == 0 and road[r][5] == cross[i][0]:
+                                    continue
+                                else:
+                                    cross_adjacency_infrequent[i + 1][x + 1] = count_cross_frequency[i + 1]  # 行驶次数最少
+
+    map(cross_number, cross_adjacency_high_speed, low_frequency)  # 频率低的路线
+    generating_path(car_number, answer_low_frequency, low_frequency, cross_road, count_cross_frequency)  # 速度最快路线
+    ##############################################################################################
 
     # 定义字典，用于存储每个车的行驶路径
     answerMap = {}
@@ -241,7 +278,8 @@ def main():
     # 对终点数组进行排序
     # carEndPoint = sorted(carEndPoint)
 
-    # 定义Map，存储相同终点的车辆， key：终点   value：该终点的所有车辆
+
+    # 定义Map，存储相同终点的车辆， key：起点   value：该终点的所有车辆
     endPointMap = {}
     for i in range(len(carEndPoint)):
         tempCarInfoArray = []
