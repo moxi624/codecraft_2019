@@ -93,7 +93,8 @@ def Dijkstra(points, graph, start, end, dictionary):
             if vis[j] == 0 and dis[j] < min:
                 t = j
                 min = dis[j]
-        vis[t] = 1  # 找到最短的一条路径 ,标记
+        # 找到最短的一条路径 ,标记
+        vis[t] = 1
         for j in range(points + 1):
             if vis[j] == 0 and dis[j] > dis[t] + map[t][j]:
                 dis[j] = dis[t] + map[t][j]
@@ -154,19 +155,31 @@ def generating_path(path,node):
             every_answer.append(cross_road[str(walk[j]) + '-' + str(walk[j + 1])])
         path.append(every_answer)
 
-
-generating_path(answer, shortest_distance)
+# 正常的
+# generating_path(answer, shortest_distance)
+#速度最快的
 generating_path(answer_high_speed, high_speed)
+#速度最慢的
 generating_path(answer_slow_speed, slow_speed)
 
 # print(answer)
 # print(answer_high_speed)
 # print(answer_slow_speed)
 
-# 定义字典，用于存储每个车的行驶路径
+# 定义字典，用于存储每个车的正常行驶路径
 answerMap = {}
-for item in answer:
-    answerMap.setdefault(item[0], item)
+# for item in answer:
+#     answerMap.setdefault(item[0], item)
+
+# 定义字典，用于存储每个车的高速行驶路径
+answerHighMap = {}
+for item in answer_high_speed:
+    answerHighMap.setdefault(item[0], item)
+
+# 定义字典，用于存储每个车的低速行驶路径
+answerSlowMap = {}
+for item in answer_slow_speed:
+    answerSlowMap.setdefault(item[0], item)
 
 # 定义所有车辆起点数组
 carEndPoint = []
@@ -188,7 +201,6 @@ endPointMap = {};
 for i in range(len(carEndPoint)):
     tempCarInfoArray = []
     for j in range(car_number):
-        # 将标号相邻的两个
         if carEndPoint[i] == car[j][2]:
             tempCarInfoArray.append(car[j])
     endPointMap.setdefault(i, tempCarInfoArray)
@@ -232,7 +244,7 @@ for key, values in endPointMap.items():
     #     answerMap.setdefault(carId, car)
 
     # planC 快车先行
-    # 得到所有车的速度数组
+    #     # 得到所有车的速度数组
     speedArray = []
     maxSpeed = 0
     for item in values:
@@ -247,11 +259,20 @@ for key, values in endPointMap.items():
     for speed in speedArray:
         if speed > maxSpeed:
             maxSpeed = speed
+    halfMaxSpeed = int(maxSpeed/2)
     for item in values:
         # 得到车辆的ID
         carId = item[0]
         carSpeed = item[3]
-        car = answerMap.get(carId)
+
+        # 对速度划分为两部分，低速车走低速车道，高速车走高速车道（这里低速和高速指的是权值）
+        if halfMaxSpeed > carSpeed:
+            # 走快速车道
+            car = answerHighMap.get(carId)
+        else:
+            # 走低速车道
+            car = answerSlowMap.get(carId)
+
         # 修改车辆的planTime   当前时间片 + 最高速度 - 车辆当前速度
         # 这样能够让速度快的车辆，优先先行，慢车就会排在快车的后面
         car[1] = planTime + maxSpeed - carSpeed
