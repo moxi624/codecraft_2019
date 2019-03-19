@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 from numpy.random import rand
 
+
 def input_txt(file_address):
     with open(file_address, "r") as f:
         str = f.read()
@@ -18,21 +19,29 @@ def input_txt(file_address):
     Arr = Arr.astype(int)
     return Arr
 
+
 def output_txt(file_address, answer):
     with open(file_address, "w") as f:
         f.writelines("#(carId,StartTime,RoadId...)")
         f.writelines("\n")
         for j in answer:
-            datastr=str(j)
-            datastr=datastr.replace("[", "(")
-            datastr=datastr.replace("]", ")")
+            datastr = str(j)
+            datastr = datastr.replace("[", "(")
+            datastr = datastr.replace("]", ")")
             f.writelines(datastr)
             f.writelines("\n")
 
+
+# 最短距离字典
 shortest_distance = {}
+# 速度最快字典
+high_speed = {}
+# 速度慢字典
+slow_speed = {}
+
+
 # 用Dijkstra's Algorithm算法，计算出最短路径
-def Dijkstra(points, graph, start, end):
-    # 最短距离字典
+def Dijkstra(points, graph, start, end, dictionary):
     pre = [0] * (points + 1)  # 记录前驱
     vis = [0] * (points + 1)  # 记录节点遍历状态
     dis = [float('inf') for i in range(points + 1)]  # 保存最短距离
@@ -76,9 +85,25 @@ def Dijkstra(points, graph, start, end):
     # print("最短距离：", dis[end],end=" ")
     # print("最短路径：", roads)
 
-    shortest_distance[str(start) + '-' + str(end)] = roads
+    dictionary[str(start) + '-' + str(end)] = roads
 
-    return shortest_distance
+
+# 固定map图
+def map(cross_number, matrix0, matrix1, matrix2):
+    for i in range(cross_number):
+        for j in range(cross_number):
+            Dijkstra(cross_number, matrix0, i + 1, j + 1, shortest_distance)  # 普通权重
+            Dijkstra(cross_number, matrix1, i + 1, j + 1, high_speed)  # 速度快
+            Dijkstra(cross_number, matrix2, i + 1, j + 1, slow_speed)  # 速度慢
+
+
+def generating_path(car_number, path, node, cross_road):
+    for i in range(car_number):
+        every_answer = [car[i][0], car[i][4]]
+        walk = node[str(car[i][1]) + '-' + str(car[i][2])]
+        for j in range(len(walk) - 1):
+            every_answer.append(cross_road[str(walk[j]) + '-' + str(walk[j + 1])])
+        path.append(every_answer)
 
 
 logging.basicConfig(level=logging.DEBUG,
@@ -91,6 +116,8 @@ car = []
 road = []
 cross = []
 answerPath = ""
+
+
 def main():
     if len(sys.argv) != 5:
         logging.info('please input args: car_path, road_path, cross_path, answerPath')
@@ -101,11 +128,10 @@ def main():
     cross_path = sys.argv[3]
     answer_path = sys.argv[4]
 
-    global  car
+    global car
     global road
     global cross
     global answerPath
-
 
     car = input_txt(car_path).reshape(-1, 5)
     road = input_txt(road_path).reshape(-1, 7)
@@ -117,8 +143,6 @@ def main():
     logging.info("cross_path is %s" % (cross_path))
     logging.info("answer_path is %s" % (answer_path))
 
-
-
     # 总路口数
     cross_number = len(cross)
     # 道路数量
@@ -126,8 +150,12 @@ def main():
     # 车的数量
     car_number = len(car)
 
-    cross_adjacency_matrix = np.ones((cross_number+1, cross_number+1))
-    cross_adjacency_matrix = float('inf')*cross_adjacency_matrix
+    cross_adjacency_matrix = np.ones((cross_number + 1, cross_number + 1))
+    cross_adjacency_matrix = float('inf') * cross_adjacency_matrix
+    cross_adjacency_high_speed = np.ones((cross_number + 1, cross_number + 1))
+    cross_adjacency_high_speed = float('inf') * cross_adjacency_high_speed
+    cross_adjacency_slow_speed = np.ones((cross_number + 1, cross_number + 1))
+    cross_adjacency_slow_speed = float('inf') * cross_adjacency_slow_speed
     # 构建路口的邻接矩阵(数值为距离，-1为不连通）
     for i in range(cross_number):
         for j in range(1, 5):
@@ -135,24 +163,24 @@ def main():
                 continue
             for x in range(cross_number):
                 for y in range(1, 5):
-                    if cross[i][j] == cross[x][y]:   # 找出相邻路口
+                    if cross[i][j] == cross[x][y]:  # 找出相邻路口
                         for r in range(road_number):
                             if road[r][0] == cross[i][j] and i != x:
                                 if road[r][6] == 0 and road[r][5] == cross[i][0]:
                                     continue
                                 else:
-                                    cross_adjacency_matrix[i+1][x+1] = (road[r][1]/((0.95)*road[r][2]*(road[r][3])))   # 获得路口之间距离
-    #重新评估权重2019-3-18
+                                    cross_adjacency_matrix[i + 1][x + 1] = (
+                                                road[r][1] / ((0.95) * road[r][2] * (road[r][3])))  # 获得路口之间距离
+                                    cross_adjacency_high_speed[i + 1][x + 1] = (
+                                            10 / ((1.5) * road[r][2] * (road[r][3])))  # 速度块
+                                    cross_adjacency_slow_speed[i + 1][x + 1] = (road[r][2] / (road[r][3]))  # 速度慢
+    # 重新评估权重2019-3-18
 
     # print(cross_adjacency_matrix)
     # cam = pd.DataFrame(cross_adjacency_matrix)
     # cam.to_csv('cam.csv')
 
-    map = cross_adjacency_matrix
-    for i in range(cross_number):
-        for j in range(cross_number):
-            Dijkstra(cross_number, map, i+1, j+1)# 从小到大
-
+    map(cross_number, cross_adjacency_matrix, cross_adjacency_high_speed, cross_adjacency_slow_speed)
 
     # 路口->道路的字典
     cross_road = {}
@@ -163,16 +191,13 @@ def main():
         else:
             cross_road[str(road[i][4]) + '-' + str(road[i][5])] = road[i][0]
 
-    answer = []
+    answer = []  # 普通路径
+    answer_high_speed = []  # 速度块的路径
+    answer_slow_speed = []  # 速度慢的路径
     # 生成每辆车的最短路径
-    for i in range(car_number):
-        every_answer = []
-        every_answer.append(car[i][0])
-        every_answer.append(car[i][4])  # 先处理成默认发车时间
-        walk = shortest_distance[str(car[i][1]) + '-' + str(car[i][2])]
-        for j in range(len(walk) - 1):
-            every_answer.append(cross_road[str(walk[j]) + '-' + str(walk[j + 1])])
-        answer.append(every_answer)
+    generating_path(car_number, answer, shortest_distance, cross_road)
+    generating_path(car_number, answer_high_speed, high_speed, cross_road)
+    generating_path(car_number, answer_slow_speed, slow_speed, cross_road)
 
     # 定义字典，用于存储每个车的行驶路径
     answerMap = {}
@@ -191,9 +216,8 @@ def main():
         if tag == 0:
             carStartingPoint.append(car[i][2])
 
-
     # 定义Map，存储相同终点的车辆， key：终点   value：该起点的所有车辆
-    startintPointMap = {};
+    startintPointMap = {}
     for i in range(len(carStartingPoint)):
         tempCarInfoArray = []
         for j in range(car_number):
@@ -267,12 +291,12 @@ def main():
             car[1] = planTime + maxSpeed - carSpeed
             answerMap.setdefault(carId, car)
 
-
     result = []
     for item in answerMap.values():
         result.append(item)
 
     output_txt(answerPath, result)
+
 
 # to write output file
 
