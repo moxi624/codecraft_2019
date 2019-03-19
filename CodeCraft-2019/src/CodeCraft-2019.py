@@ -239,16 +239,24 @@ def main():
         endPointMap.setdefault(i, tempCarInfoArray)
 
     # 定义系统调度时间
-    totalTIme = 550
+    totalTIme = 500
 
     # 定义每个时间片调度时间
-    step = int(totalTIme / endPointMap.keys().__len__())
+    # step = int(totalTIme / endPointMap.keys().__len__())
 
     planTime = 0
     startMaxPlanTime = 0
 
     # 获得每个分类的车辆出发时间片
     for key, values in endPointMap.items():
+
+        # 时间片大小进一步划分（根据驶入当前终点的车辆数，动态改变 ）  （总分片/ 总车辆 ）* 当前点车辆
+        step = int((totalTIme / car_number) * len(values))
+        # 太小的时间片，给一个默认值
+        if step < 5:
+            step = 5
+        # 太大的时间片，是否也设置一个最大值呢？
+
         # 第一次读取最大的出发时间
         if startMaxPlanTime == 0:
             for item in values:
