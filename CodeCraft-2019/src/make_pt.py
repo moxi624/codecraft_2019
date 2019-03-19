@@ -33,8 +33,8 @@ for i in road:
 
 
 
-# nx.draw_spectral(G, with_labels=True,)
-# plt.show()
+nx.draw_spectral(G, with_labels=True,)
+plt.show()
 
 
 
