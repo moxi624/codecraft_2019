@@ -16,9 +16,9 @@ def input_txt(file_address):
     return Arr
 
 
-car = input_txt("../config/car.txt").reshape(-1,5)
-road = input_txt("../config/road.txt").reshape(-1,7)
-cross = input_txt("../config/cross.txt").reshape(-1,5)
+car = input_txt("../config/car.txt").reshape(-1, 5)
+road = input_txt("../config/road.txt").reshape(-1, 7)
+cross = input_txt("../config/cross.txt").reshape(-1, 5)
 
 # 总路口数
 cross_number = len(cross)
