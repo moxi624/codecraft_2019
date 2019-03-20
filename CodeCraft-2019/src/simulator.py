@@ -7,9 +7,6 @@ np.random.seed(951105)
 
 
 
-
-
-
 TIME = [0]
 CARDISTRIBUTION = [0,0,0]
 CARNAMESPACE,ROADNAMESPACE,CROSSNAMESPACE = [],[],[]
@@ -337,13 +334,13 @@ class ROAD(object):
     def __provideDone__(self):
         return self.provideDone[0]
 
-
 class CROSS(object):
     def __init__(self, id_, north_, east_, south_, west_):
         # **** statistic parameters ****#
         self.id_ = id_
         self.roadIds = [north_, east_, south_, west_]
         self.carport = {}
+        self.left=[]
         # absolute loc
         self.x, self.y = 0, 0
         self.mapX,self.mapY = 0,0
@@ -435,10 +432,14 @@ class CROSS(object):
                 done = False
         self.done = done
     def outOfCarport(self):
-        if TIME[0] not in self.carport.keys():
+        self.readyCars = self.left
+        self.left=[]
+        if TIME[0] in self.carport.keys():
+            self.carport[TIME[0]].sort()
+            self.readyCars.extend(self.carport[TIME[0]])
+        if self.readyCars.__len__() == 0:
             return
-        self.readyCars = self.carport[TIME[0]]
-        self.readyCars.sort()
+        #self.readyCars.sort()
         for roadId in self.receiver:
             ROADDICT[roadId].setBucket(self.id_)
         for i in range(self.readyCars.__len__()):
@@ -448,7 +449,10 @@ class CROSS(object):
             if roadId not in self.receiver:
                 print("Car(%d).Road(%d) not in cross(%d).function:class.outOfCarport"%(carId,roadId,self.id_))
             act = road.receiveCar(carId)
-            assert act==0, print("Time(%d),Cross(%d),Road(%d),Car(%d) can't pull away from carport"%(TIME[0],self.id_,roadId,carId))
+            if act!=0:
+                self.left=self.readyCars[i:]
+                break
+            #assert act==0, print("Time(%d),Cross(%d),Road(%d),Car(%d) can't pull away from carport"%(TIME[0],self.id_,roadId,carId))
             self.carportCarNum -= 1
             CARDISTRIBUTION[0] -= 1
             CARDISTRIBUTION[1] += 1
@@ -554,8 +558,9 @@ class simulation(object):
         visualize.crossLocGen()
         while True:
             self.step()
-            visualize.drawMap()
+            #visualize.drawMap()
             if CARDISTRIBUTION[2]==CARNAMESPACE.__len__():
+                print(CARDISTRIBUTION[2])
                 break
             if self.dead:
                 break
@@ -723,7 +728,7 @@ class visualization(object):
                    cv.FONT_HERSHEY_SIMPLEX, 0.6, [0, 0, 255], 2)
 
 
-
+import sys
 
 def main():
     car_path = sys.argv[1]
@@ -782,6 +787,6 @@ def main():
 if __name__  ==   "__main__":
     main()
 
-#[10329, 10887, 10983, 11689, 13482, 13511, 16323, 18152, 18551, 20156]
+
 
 # python simulator.py ../config_11/car.txt ../config_11/road.txt ../config_11/cross.txt ../config_11/answer.txt
