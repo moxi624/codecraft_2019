@@ -289,24 +289,31 @@ def main():
         if tag == 0:
             carStartPoint.append(car[i][1])
 
-    # 定义所有车辆计划出发时间的数组集合
-    carPlanTimePoint = []
+    # 定义所有车辆距离数组
+    carDistancePoint = []
     for i in range(car_number):
         # 定义标志位，判断是否包含该元素
         tag = 0
-        for j in range(len(carPlanTimePoint)):
-            if car[i][4] == carPlanTimePoint[j]:
+        for j in range(len(carStartPoint)):
+            if car[i][1] == carStartPoint[j]:
                 tag = 1
                 break
         if tag == 0:
-            carPlanTimePoint.append(car[i][4])
+            carStartPoint.append(car[i][1])
 
-    print("###############")
-    print(sorted(carPlanTimePoint))
-    print("###############")
 
-    # 对终点数组进行排序
-    # carEndPoint = sorted(carEndPoint)
+    # 定义所有车辆计划出发时间的数组集合
+    # carPlanTimePoint = []
+    # for i in range(car_number):
+    #     # 定义标志位，判断是否包含该元素
+    #     tag = 0
+    #     for j in range(len(carPlanTimePoint)):
+    #         if car[i][4] == carPlanTimePoint[j]:
+    #             tag = 1
+    #             break
+    #     if tag == 0:
+    #         carPlanTimePoint.append(car[i][4])
+
 
 
     # 定义Map，存储相同终点的车辆， key：终点   value：该终点的所有车辆
@@ -328,13 +335,22 @@ def main():
         startPointMap.setdefault(carStartPoint[i], tempCarInfoArray)
 
     # 定义Map，存储相同计划出发时间的车辆， key：计划出发时间   value：该计划出发时间的所有车辆
-    planTimePointMap = {}
-    for i in range(len(carPlanTimePoint)):
+    # planTimePointMap = {}
+    # for i in range(len(carPlanTimePoint)):
+    #     tempCarInfoArray = []
+    #     for j in range(car_number):
+    #         if carPlanTimePoint[i] == car[j][4]:
+    #             tempCarInfoArray.append(car[j])
+    #     planTimePointMap.setdefault(carPlanTimePoint[i], tempCarInfoArray)
+
+    # 定义Map，存储车辆起始距离的车辆， key：距离范围   value：该距离范围内所有车辆
+    distancePointMap = {}
+    for i in range(len(carStartPoint)):
         tempCarInfoArray = []
         for j in range(car_number):
-            if carPlanTimePoint[i] == car[j][4]:
+            if carStartPoint[i] == car[j][2]:
                 tempCarInfoArray.append(car[j])
-        planTimePointMap.setdefault(carPlanTimePoint[i], tempCarInfoArray)
+                distancePointMap.setdefault(carStartPoint[i], tempCarInfoArray)
 
     # 定义系统调度时间
     totalTIme = 430
@@ -474,7 +490,6 @@ def main():
             # else:
             #     # 走慢速行驶车道
             #     car = answerSlowMap.get(carId)
-
 
 
             # 修改车辆的planTime   当前时间片 + 最高速度 - 车辆当前速度
