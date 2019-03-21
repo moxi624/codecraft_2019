@@ -185,8 +185,8 @@ def main():
                                     cross_adjacency_matrix[i + 1][x + 1] = (
                                             road[r][1] / (0.95 * road[r][2] * (road[r][3])))  # 获得路口之间距离
                                     cross_adjacency_high_speed[i + 1][x + 1] = (
-                                            10 / (road[r][2] * (road[r][3])))  # 速度块
-                                    cross_adjacency_slow_speed[i + 1][x + 1] = (road[r][2]*road[r][1] / (road[r][3]))  # 速度慢
+                                            10 / (1.5 * road[r][2] * (road[r][3])))  # 速度块
+                                    cross_adjacency_slow_speed[i + 1][x + 1] = (road[r][2] / (road[r][3]))  # 速度慢
                                     cross_adjacency_infrequent[i + 1][x + 1] = count_cross_frequency[i + 1]  # 行驶次数最少
     # 重新评估权重2019-3-18
     # print(cross_adjacency_matrix)
@@ -217,7 +217,7 @@ def main():
     generating_path(car_number, answer_high_speed, high_speed, cross_road, count_cross_frequency)  # 速度最快路线
     generating_path(car_number, answer_slow_speed, slow_speed, cross_road, count_cross_frequency)  # 速度最快路线
 
-    ##################################频率低的路径生成#######################################
+    ##############################################################################################
     for i in range(cross_number):
         for j in range(1, 5):
             if cross[i][j] == -1:
@@ -233,8 +233,8 @@ def main():
                                     cross_adjacency_infrequent[i + 1][x + 1] = count_cross_frequency[i + 1]  # 行驶次数最少
 
     map(cross_number, cross_adjacency_high_speed, low_frequency)  # 频率低的路线
-    generating_path(car_number, answer_low_frequency, low_frequency, cross_road, count_cross_frequency)  # 频率低的路线
-    ##################################频率低的路径生成#######################################
+    generating_path(car_number, answer_low_frequency, low_frequency, cross_road, count_cross_frequency)  # 速度最快路线
+    ##############################################################################################
 
     # 定义字典，用于存储每个车的行驶路径
     answerMap = {}

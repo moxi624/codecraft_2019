@@ -558,7 +558,7 @@ class simulation(object):
         visualize.crossLocGen()
         while True:
             self.step()
-            #visualize.drawMap()
+            visualize.drawMap()
             if CARDISTRIBUTION[2]==CARNAMESPACE.__len__():
                 print(CARDISTRIBUTION[2])
                 break
@@ -569,7 +569,7 @@ class simulation(object):
 class visualization(object):
     def __init__(self):
         self.maxX,self.maxY = 0,0
-        self.savePath = '../../../simulatePictures'
+        self.savePath = '../../simuatePictures'
         # ** cross param **#
         self.crossRadius = 14
         self.crossDistance = 150
