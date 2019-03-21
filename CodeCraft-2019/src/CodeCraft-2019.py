@@ -38,6 +38,8 @@ high_speed = {}
 slow_speed = {}
 #频率低节点路径字典
 low_frequency = {}
+#道路宽的路径字典
+wide_road = {}
 
 # 用Dijkstra's Algorithm算法，计算出最短路径
 def Dijkstra(points, graph, start, end, dictionary):
@@ -174,6 +176,8 @@ def main():
     cross_adjacency_slow_speed = float('inf') * cross_adjacency_slow_speed
     cross_adjacency_infrequent = np.ones((cross_number + 1, cross_number + 1))
     cross_adjacency_infrequent = float('inf') * cross_adjacency_infrequent
+    cross_adjacency_wide_road = np.ones((cross_number + 1, cross_number + 1))
+    cross_adjacency_wide_road = float('inf') * cross_adjacency_wide_road
 
     # 构建路口的邻接矩阵(数值为距离，-1为不连通）
     for i in range(cross_number):
@@ -193,7 +197,9 @@ def main():
                                     cross_adjacency_high_speed[i + 1][x + 1] = (
                                             10 / (1.5 * road[r][2] * (road[r][3])))  # 速度块
                                     cross_adjacency_slow_speed[i + 1][x + 1] = (road[r][2] / (road[r][3]))  # 速度慢
+                                    cross_adjacency_wide_road[i + 1][x + 1] = 10/road[r][3]
     # 重新评估权重2019-3-18
+    # print(cross_adjacency_wide_road)
     # print(cross_adjacency_matrix)
     # print(cross_adjacency_infrequent)
     # cam = pd.DataFrame(cross_adjacency_matrix)
@@ -203,6 +209,7 @@ def main():
     # map(cross_number, cross_adjacency_matrix,shortest_distance)#普通路线
     map(cross_number, cross_adjacency_high_speed, high_speed)  # 速度最快路线
     map(cross_number, cross_adjacency_slow_speed, slow_speed)  # 速度最快路线
+    map(cross_number, cross_adjacency_wide_road, wide_road)  # 路最的宽路线
 
     # 路口->道路的字典
     cross_road = {}
@@ -217,14 +224,30 @@ def main():
     answer_high_speed = []  # 速度块的路径
     answer_slow_speed = []  # 速度慢的路径
     answer_low_frequency = []  # 频率低的路径
+    answer_wide_road = [] # 道路宽的路径
+
     # 生成每辆车的road路径
-    # generating_path(car_number, answer, shortest_distance, cross_road,,cross_number)#普通路线
+    # generating_path(car_number, answer, shortest_distance, cross_road,
+    #                 cross_number, count_road_frequency,count_cross_frequency)#普通路线
     generating_path(car_number, answer_high_speed, high_speed, cross_road,
                     count_road_frequency,count_cross_frequency)  # 速度最快路线
     generating_path(car_number, answer_slow_speed, slow_speed, cross_road,
                     count_road_frequency,count_cross_frequency)  # 速度最快路线
-    # print(count_road_frequency)
-    ##############################################################################################
+    generating_path(car_number, answer_wide_road, wide_road, cross_road,
+                    count_road_frequency, count_cross_frequency)  # 道路宽路线
+
+    ################################频率最低路线生成###########################################
+    for i in range(int(road_number / 3)):  # 设置：取消道路行驶权占总道路的比例
+        max_frequency_road = 0
+        index_frequency_road = 0
+        for i in range(len(count_road_frequency)):
+            if count_road_frequency[i] < float('inf'):
+                if count_road_frequency[i] > max_frequency_road:
+                    max_frequency_road = count_road_frequency[i]
+                    index_frequency_road = i
+        count_road_frequency[index_frequency_road] = 999999
+    print(count_road_frequency)
+
     for i in range(cross_number):
         for j in range(1, 5):
             if cross[i][j] == -1:
@@ -239,11 +262,15 @@ def main():
                                 else:
                                     cross_adjacency_infrequent[i + 1][x + 1] = count_road_frequency[r] # 行驶次数最少的路
 
+    # 低频路线，取消频率过高路线的行驶权
+    # for item in cross_adjacency_infrequent
+    #     if item >= cross_adjacency_infrequent.reshape(1,-1)
+
     map(cross_number, cross_adjacency_infrequent, low_frequency)  # 频率低的路线
     #print(count_cross_frequency)
     generating_path(car_number, answer_low_frequency, low_frequency, cross_road
                     , count_road_frequency, count_cross_frequency)  # 频率低的路线
-    ##############################################################################################
+    #################################频率最低路线生成################################################
 
     # 定义字典，用于存储每个车的行驶路径
     answerMap = {}
