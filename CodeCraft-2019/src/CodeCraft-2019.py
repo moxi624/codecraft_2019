@@ -95,19 +95,26 @@ def map(cross_number, matrix, dictionary):
 
 
 
-def frequency(cross_number):
+def cross_frequency(cross_number):
     # 记录节点使用的频率
     global count_cross_frequency
     count_cross_frequency = np.zeros(cross_number + 1)  # 以1作为起始位置
     return count_cross_frequency
 
+#记录道路使用次数
+def road_frequency(road_number):
+    global count_road_frequency
+    count_road_frequency = np.zeros(road_number)
+    return count_road_frequency
 
-def generating_path(car_number, path, node, cross_road, count_cross_frequency):  # node:生成车辆的节点路径
+
+def generating_path(car_number, path, node, cross_road, count_road_frequency,count_cross_frequency):  # node:生成车辆的节点路径
     for i in range(car_number):
         every_answer = [car[i][0], car[i][4]]
         walk = node[str(car[i][1]) + '-' + str(car[i][2])]
         for j in range(len(walk) - 1):
             count_cross_frequency[walk[j]] += 1
+            count_road_frequency[(cross_road[str(walk[j]) + '-' + str(walk[j + 1])])-road[0][0]] += 1
             every_answer.append(cross_road[str(walk[j]) + '-' + str(walk[j + 1])])  # 将2节点通过字典转化为中间的道路ID
         path.append(every_answer)
 
@@ -156,7 +163,8 @@ def main():
     # 车的数量
     car_number = len(car)
 
-    frequency(cross_number)#初始化count_cross_frequency
+    cross_frequency(cross_number)#初始化count_cross_frequency
+    road_frequency(road_number)#初始化count_cross_frequency
 
     cross_adjacency_matrix = np.ones((cross_number + 1, cross_number + 1))
     cross_adjacency_matrix = float('inf') * cross_adjacency_matrix
@@ -211,9 +219,11 @@ def main():
     answer_low_frequency = []  # 频率低的路径
     # 生成每辆车的road路径
     # generating_path(car_number, answer, shortest_distance, cross_road,,cross_number)#普通路线
-    generating_path(car_number, answer_high_speed, high_speed, cross_road, count_cross_frequency)  # 速度最快路线
-    generating_path(car_number, answer_slow_speed, slow_speed, cross_road, count_cross_frequency)  # 速度最快路线
-
+    generating_path(car_number, answer_high_speed, high_speed, cross_road,
+                    count_road_frequency,count_cross_frequency)  # 速度最快路线
+    generating_path(car_number, answer_slow_speed, slow_speed, cross_road,
+                    count_road_frequency,count_cross_frequency)  # 速度最快路线
+    print(count_road_frequency)
     ##############################################################################################
     for i in range(cross_number):
         for j in range(1, 5):
@@ -227,10 +237,12 @@ def main():
                                 if road[r][6] == 0 and road[r][5] == cross[i][0]:
                                     continue
                                 else:
-                                    cross_adjacency_infrequent[i + 1][x + 1] = count_cross_frequency[i + 1]  # 行驶次数最少
+                                    cross_adjacency_infrequent[i + 1][x + 1] = count_road_frequency[r] # 行驶次数最少的路
 
     map(cross_number, cross_adjacency_infrequent, low_frequency)  # 频率低的路线
-    generating_path(car_number, answer_low_frequency, low_frequency, cross_road, count_cross_frequency)  # 频率低的路线
+    #print(count_cross_frequency)
+    generating_path(car_number, answer_low_frequency, low_frequency, cross_road
+                    , count_road_frequency, count_cross_frequency)  # 频率低的路线
     ##############################################################################################
 
     # 定义字典，用于存储每个车的行驶路径
