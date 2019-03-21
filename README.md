@@ -71,9 +71,7 @@ python src/simulator.py config/car.txt config/road.txt config/cross.txt config/a
 
 设置返回发送车辆的阈值为20
 
-时间片设置450，固定时间片采用递增的方式。 调度时间为：
-
-
+时间片设置450，固定时间片采用递增的方式。 调度时间为：580+595
 
 创建分支，提交 V0.0.4版本
 
