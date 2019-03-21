@@ -22,8 +22,6 @@ def input_txt(file_address):
 
 def output_txt(file_address, answer):
     with open(file_address, "w") as f:
-        f.writelines("#(carId,StartTime,RoadId...)")
-        f.writelines("\n")
         for j in answer:
             datastr = str(j)
             datastr = datastr.replace("[", "(")
@@ -187,7 +185,6 @@ def main():
                                     cross_adjacency_high_speed[i + 1][x + 1] = (
                                             10 / (1.5 * road[r][2] * (road[r][3])))  # 速度块
                                     cross_adjacency_slow_speed[i + 1][x + 1] = (road[r][2] / (road[r][3]))  # 速度慢
-                                    cross_adjacency_infrequent[i + 1][x + 1] = count_cross_frequency[i + 1]  # 行驶次数最少
     # 重新评估权重2019-3-18
     # print(cross_adjacency_matrix)
     # print(cross_adjacency_infrequent)
@@ -232,8 +229,8 @@ def main():
                                 else:
                                     cross_adjacency_infrequent[i + 1][x + 1] = count_cross_frequency[i + 1]  # 行驶次数最少
 
-    map(cross_number, cross_adjacency_high_speed, low_frequency)  # 频率低的路线
-    generating_path(car_number, answer_low_frequency, low_frequency, cross_road, count_cross_frequency)  # 速度最快路线
+    map(cross_number, cross_adjacency_infrequent, low_frequency)  # 频率低的路线
+    generating_path(car_number, answer_low_frequency, low_frequency, cross_road, count_cross_frequency)  # 频率低的路线
     ##############################################################################################
 
     # 定义字典，用于存储每个车的行驶路径
