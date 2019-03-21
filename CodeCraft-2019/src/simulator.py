@@ -569,7 +569,7 @@ class simulation(object):
 class visualization(object):
     def __init__(self):
         self.maxX,self.maxY = 0,0
-        self.savePath = '../../simuatePictures'
+        self.savePath = './simuatePictures'
         # ** cross param **#
         self.crossRadius = 14
         self.crossDistance = 150

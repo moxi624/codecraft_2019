@@ -3,6 +3,12 @@
 #### 介绍
 华为软件精英挑战赛是华为公司面向在校大学生举办的大型软件竞赛，从2015年至今已成功举办四届。在软件精英挑战赛的舞台上，我们相信您可以充分展示软件设计与编程的能力、享受coding解决问题的乐趣、感受软件改变世界的魅力。 2019届华为软件精英挑战赛赛题为“智能世界•纵横”！
 
+运行仿真图
+
+#!/bin/bash
+cd CodeCraft-2019
+python src/simulator.py config/car.txt config/road.txt config/cross.txt config/answer.txt
+
 
 
 #### 提交日志
