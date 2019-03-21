@@ -65,6 +65,18 @@ python src/simulator.py config/car.txt config/road.txt config/cross.txt config/a
 
 
 
+#### 修改路径算法
+
+以该终点的车发车时，同时把终点设置成起点，将车辆同时发送出去。
+
+设置返回发送车辆的阈值为20
+
+时间片设置450，固定时间片采用递增的方式。 调度时间为：
+
+
+
+创建分支，提交 V0.0.4版本
+
 
 
 

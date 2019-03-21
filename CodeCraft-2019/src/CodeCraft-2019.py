@@ -260,6 +260,11 @@ def main():
     for item in answer_slow_speed:
         answerSlowMap.setdefault(item[0], item)
 
+    # 定义字典，用于存储每个车的最少行驶路径
+    answerLowFrequencyMap = {}
+    for item in answer_low_frequency:
+        answerLowFrequencyMap.setdefault(item[0], item)
+
     # 定义所有车辆终点数组
     carEndPoint = []
     for i in range(car_number):
@@ -331,9 +336,6 @@ def main():
                 tempCarInfoArray.append(car[j])
         planTimePointMap.setdefault(carPlanTimePoint[i], tempCarInfoArray)
 
-    for key, values in planTimePointMap.items():
-        print(key, len(values))
-
     # 定义系统调度时间
     totalTIme = 430
 
@@ -357,13 +359,21 @@ def main():
         # startPointCarList = startPointMap.get(key)
 
         # 定义一个阈值，当小于某个值的时候，那么就将以该起点的车也一起发送
-
         startPointCarList = []
-        mergeCarList = []
-        if startPointCarList != None:
-            mergeCarList = values + startPointCarList
-        else:
-            mergeCarList = values
+
+        tempStartPointCarList = startPointMap.get(key)
+        # 每个终点发送的车辆数目
+        thresholdValue = 30
+        # 进行五轮迭代发车后，就不在终点处继续发车了
+        if firstStartCar <= 10:
+            if tempStartPointCarList != None:
+                for car in tempStartPointCarList:
+                    if thresholdValue <= 0:
+                        break
+                    thresholdValue = thresholdValue - 1
+                    startPointCarList.append(car)
+
+        mergeCarList = values + startPointCarList
 
         # 将要出发的车辆列表
         willStartCar = []
@@ -398,7 +408,8 @@ def main():
                     startMaxPlanTime = item[4]
             planTime = startMaxPlanTime
         else:
-            firstStartCar = 0
+            # 慢慢递增
+            firstStartCar += 1
             planTime += step
 
         # plan A 并发发车
@@ -438,6 +449,8 @@ def main():
             if speed > maxSpeed:
                 maxSpeed = speed
         halfMaxSpeed = int(maxSpeed / 2)
+        # maxSpeed_7_3 = int((maxSpeed / 7)*3)
+        # maxSpeed_7_4 = int((maxSpeed / 7) * 4)
         for item in values:
             # 得到车辆的ID
             carId = item[0]
@@ -448,8 +461,21 @@ def main():
                 # 走快速车道
                 car = answerHighMap.get(carId)
             else:
-                # 走低速车道
+                # 走最少行驶车道
                 car = answerSlowMap.get(carId)
+
+            # if maxSpeed_7_3 > carSpeed:
+            #     # 走快速车道
+            #     car = answerHighMap.get(carId)
+            #
+            # if maxSpeed_7_4 > carSpeed:
+            #     # 走最少使用车道
+            #     car = answerLowFrequencyMap.get(carId)
+            # else:
+            #     # 走慢速行驶车道
+            #     car = answerSlowMap.get(carId)
+
+
 
             # 修改车辆的planTime   当前时间片 + 最高速度 - 车辆当前速度
             # 这样能够让速度快的车辆，优先先行，慢车就会排在快车的后面
