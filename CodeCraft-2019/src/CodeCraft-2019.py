@@ -461,27 +461,10 @@ def main():
         else:
             # 慢慢递增
             firstStartCar += 1
-            planTime += step
 
-        # plan A 并发发车
-        # for item in values:
-        #     carId = item[0]
-        #     car = answerMap.get(carId)
-        #     car[1] = planTime
-        #     answerMap.setdefault(carId, car)
-
-        # planB 分片发车
-        #  对每个时间片，在进行切割
-        # itemPlanTime = int(step / len(values))
-        #
-        # for item in values:
-        #     # 得到车辆的ID
-        #     carId = item[0]
-        #     car = answerMap.get(carId)
-        #     # 修改车辆的planTime
-        #     planTime = planTime + itemPlanTime
-        #     car[1] = planTime
-        #     answerMap.setdefault(carId, car)
+            # 最后一些车辆，让它们一起发车
+            if firstStartCar <= int(0.9 * endPointMap.keys().__len__()):
+                planTime += step
 
         # planC 快车先行
         # 得到所有车的速度数组
@@ -511,7 +494,7 @@ def main():
 
         willStartCar = tempWillStartCar
 
-        # halfMaxSpeed = int( maxSpeed/ 2)
+        halfMaxSpeed = int( maxSpeed/ 2)
 
         halfCount = int((len(willStartCar)) / 2)
 
@@ -522,6 +505,7 @@ def main():
         startCarCount = 0
         for item in values:
             startCarCount += 1
+
             # 得到车辆的ID
             carId = item[0]
             carSpeed = item[3]
@@ -545,18 +529,18 @@ def main():
                 car = answerNormalMap.get(carId)
 
             elif firstStartCar <= int(0.5*endPointMap.keys().__len__()):
-                if halfCount > startCarCount:
-                    # 走快速车道
+                if carSpeed < halfMaxSpeed:
                     car = answerHighMap.get(carId)
                 else:
-                    # 走最少行驶车道
                     car = answerSlowMap.get(carId)
 
-            elif firstStartCar <= int(0.75*endPointMap.keys().__len__()):
-                # 走慢速行驶车道
-                car = answerLowFrequencyMap.get(carId)
+            elif firstStartCar <= int(0.9*endPointMap.keys().__len__()):
+                if carSpeed < halfMaxSpeed:
+                    car = answerHighMap.get(carId)
+                else:
+                    car = answerSlowMap.get(carId)
             else:
-                car = answerHighMap.get(carId)
+                car = answerNormalMap.get(carId)
 
 
             # 修改车辆的planTime   当前时间片 + 最高速度 - 车辆当前速度
