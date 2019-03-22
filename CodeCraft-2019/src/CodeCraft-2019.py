@@ -260,7 +260,7 @@ def main():
                                 if road[r][6] == 0 and road[r][5] == cross[i][0]:
                                     continue
                                 else:
-                                    cross_adjacency_infrequent[i + 1][x + 1] = count_road_frequency[r] # 行驶次数最少的路
+                                    cross_adjacency_infrequent[i + 1][x + 1] = count_road_frequency[r]/road[r][3] # 行驶次数最少的路
 
     # 低频路线，取消频率过高路线的行驶权
     # for item in cross_adjacency_infrequent
@@ -296,9 +296,9 @@ def main():
         answerLowFrequencyMap.setdefault(item[0], item)
 
     # 定义字典，用于存储每个车的道路最宽行驶路径
-    # answerWideRoadMap = {}
-    # for item in answer_wide_road:
-    #     answerWideRoadMap.setdefault(item[0], item)
+    answerWideRoadMap = {}
+    for item in answer_wide_road:
+        answerWideRoadMap.setdefault(item[0], item)
 
     # 定义所有车辆终点数组
     carEndPoint = []
@@ -388,7 +388,7 @@ def main():
                 distancePointMap.setdefault(carStartPoint[i], tempCarInfoArray)
 
     # 定义系统调度时间
-    totalTIme = 430
+    totalTIme = 500
 
     # 定义每个时间片调度时间
     # step = int(totalTIme / endPointMap.keys().__len__())
@@ -446,7 +446,7 @@ def main():
         # 时间片大小进一步划分（根据驶入当前终点的车辆数，动态改变 ）  （总分片/ 总车辆 ）* 当前点车辆
         step = int((totalTIme / car_number) * len(values))
         # 太小的时间片，给一个默认值
-        if step < 4:
+        if step < 3:
             step = step + 2
         # 太大的时间片，是否也设置一个最大值呢？
 
@@ -494,37 +494,69 @@ def main():
                 if tempSpeed == carSpeed:
                     flag = 1
             if flag == 0:
+                # 得到最高速度
+                if carSpeed > maxSpeed:
+                    maxSpeed = carSpeed
                 speedArray.append(carSpeed)
 
-        for speed in speedArray:
-            if speed > maxSpeed:
-                maxSpeed = speed
-        halfMaxSpeed = int(maxSpeed / 2)
-        # maxSpeed_7_3 = int((maxSpeed / 10)*1)
-        # maxSpeed_7_4 = int((maxSpeed / 10) * 5)
+        speedArray = sorted(speedArray)
+
+        # 将车辆按速度从小到大排序
+        tempWillStartCar = []
+        for tempCarSpeed in speedArray:
+            for item in willStartCar:
+                carSpeed = item[3]
+                if carSpeed == tempCarSpeed:
+                    tempWillStartCar.append(item)
+
+        willStartCar = tempWillStartCar
+
+        # halfMaxSpeed = int( maxSpeed/ 2)
+
+        halfCount = int((len(willStartCar)) / 2)
+
+        count_7_3 = int((len(willStartCar) / 7)*3)
+        count_7_4 = int((len(willStartCar) / 7) * 4)
+
+        # 计数器，用于计算该分类下，出发的车辆
+        startCarCount = 0
         for item in values:
+            startCarCount += 1
             # 得到车辆的ID
             carId = item[0]
             carSpeed = item[3]
 
-            # 对速度划分为两部分，低速车走低速车道，高速车走高速车道（这里低速和高速指的是权值）
-            if halfMaxSpeed > carSpeed:
-                # 走快速车道
-                car = answerHighMap.get(carId)
-            else:
-                # 走最少行驶车道
-                car = answerSlowMap.get(carId)
-
-            # if maxSpeed_7_3 > carSpeed:
-            #     # 走最少使用车道
-            #     car = answerLowFrequencyMap.get(carId)
-            # if maxSpeed_7_4 > carSpeed:
-            #     # 走慢速行驶车道
-            #     car = answerSlowMap.get(carId)
+            # 按照速度划分
+            # if carSpeed < halfMaxSpeed:
+            #     car = answerHighMap.get(carId)
             # else:
+            #     car = answerSlowMap.get(carId)
+
+            # 按出发车辆规划路线
+            # if halfCount > startCarCount:
             #     # 走快速车道
             #     car = answerHighMap.get(carId)
+            # else:
+            #     # 走最少行驶车道
+            #     car = answerSlowMap.get(carId)
 
+            # 设置一个阈值，当时间片快要结束的时候，所有的车，都走快速车道
+            if firstStartCar <= int(0.1*endPointMap.keys().__len__()):
+                car = answerNormalMap.get(carId)
+
+            elif firstStartCar <= int(0.5*endPointMap.keys().__len__()):
+                if halfCount > startCarCount:
+                    # 走快速车道
+                    car = answerHighMap.get(carId)
+                else:
+                    # 走最少行驶车道
+                    car = answerSlowMap.get(carId)
+
+            elif firstStartCar <= int(0.75*endPointMap.keys().__len__()):
+                # 走慢速行驶车道
+                car = answerLowFrequencyMap.get(carId)
+            else:
+                car = answerHighMap.get(carId)
 
 
             # 修改车辆的planTime   当前时间片 + 最高速度 - 车辆当前速度
