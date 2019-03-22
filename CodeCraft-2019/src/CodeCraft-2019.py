@@ -388,7 +388,7 @@ def main():
                 distancePointMap.setdefault(carStartPoint[i], tempCarInfoArray)
 
     # 定义系统调度时间
-    totalTIme = 500
+    totalTIme = 3000
 
     # 定义每个时间片调度时间
     # step = int(totalTIme / endPointMap.keys().__len__())
