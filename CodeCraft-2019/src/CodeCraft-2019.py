@@ -4,7 +4,9 @@ import sys
 import pandas as pd
 import numpy as np
 from numpy.random import rand
-
+import datetime
+from multiprocessing import Manager
+from multiprocessing import Process
 
 def input_txt(file_address):
     with open(file_address, "r") as f:
@@ -30,16 +32,7 @@ def output_txt(file_address, answer):
             f.writelines("\n")
 
 
-# 最短距离节点路径字典
-shortest_distance = {}
-# 速度最快节点路径字典
-high_speed = {}
-# 速度慢节点路径字典
-slow_speed = {}
-#频率低节点路径字典
-low_frequency = {}
-#道路宽的路径字典
-wide_road = {}
+
 
 # 用Dijkstra's Algorithm算法，计算出最短路径
 def Dijkstra(points, graph, start, end, dictionary):
@@ -85,7 +78,6 @@ def Dijkstra(points, graph, start, end, dictionary):
     # print(str(start+1)+" 到 "+str(end+1))
     # print("最短距离：", dis[end],end=" ")
     # print("最短路径：", roads)
-
     dictionary[str(start) + '-' + str(end)] = roads
 
 
@@ -94,7 +86,6 @@ def map(cross_number, matrix, dictionary):
     for i in range(cross_number):
         for j in range(cross_number):
             Dijkstra(cross_number, matrix, i + 1, j + 1, dictionary)  # 普通权重
-
 
 
 def cross_frequency(cross_number):
@@ -134,6 +125,7 @@ answerPath = ""
 
 
 def main():
+    start = datetime.datetime.now()
     if len(sys.argv) != 5:
         logging.info('please input args: car_path, road_path, cross_path, answerPath')
         exit(1)
@@ -205,11 +197,35 @@ def main():
     # cam = pd.DataFrame(cross_adjacency_matrix)
     # cam.to_csv('cam.csv')
 
+    end1 = datetime.datetime.now()-start
+    print(end1)#0.282849s
+
     # 生成经过cross的路线
-    map(cross_number, cross_adjacency_matrix,shortest_distance)#普通路线
-    map(cross_number, cross_adjacency_high_speed, high_speed)  # 速度最快路线
-    map(cross_number, cross_adjacency_slow_speed, slow_speed)  # 速度最慢路线
+
+    # 最短距离节点路径字典
+    shortest_distance = Manager().dict()
+    # 速度最快节点路径字典
+    high_speed = Manager().dict()
+    # 速度最慢节点路径字典
+    slow_speed = Manager().dict()
+    # 频率低节点路径字典
+    low_frequency = Manager().dict()
+    # 道路宽的路径字典
+    wide_road = {}
+
+    p1 = Process(target=map,args=(cross_number, cross_adjacency_matrix,shortest_distance))#普通路线
+    p2 = Process(target=map,args=(cross_number, cross_adjacency_high_speed, high_speed))  # 速度最快路线
+    p3 = Process(target=map,args=(cross_number, cross_adjacency_slow_speed, slow_speed))  # 速度最慢路线
+    p1.start()
+    p2.start()
+    p3.start()
+    p1.join()
+    p2.join()
+    p3.join()
     # map(cross_number, cross_adjacency_wide_road, wide_road)  # 路最的宽路线
+    # print(high_speed)
+    end2 = datetime.datetime.now() - start
+    print(end2)#1.59.01s
 
     # 路口->道路的字典
     cross_road = {}
@@ -236,6 +252,8 @@ def main():
     # generating_path(car_number, answer_wide_road, wide_road, cross_road,
     #                 count_road_frequency, count_cross_frequency)  # 道路宽路线
 
+    end3 = datetime.datetime.now() - start
+    print(end3)#2.03.45
     ################################频率最低路线生成###########################################
     for i in range(int(road_number / 3)):  # 设置：取消道路行驶权占总道路的比例
         max_frequency_road = 0
@@ -270,6 +288,9 @@ def main():
     #print(count_cross_frequency)
     generating_path(car_number, answer_low_frequency, low_frequency, cross_road
                     , count_road_frequency, count_cross_frequency)  # 频率低的路线
+
+    end4 = datetime.datetime.now() - start
+    print(end4)
     #################################频率最低路线生成################################################
 
     # 定义答案Map
@@ -559,7 +580,8 @@ def main():
 
 
 # to write output file
-
+    end5 = datetime.datetime.now() - start
+    print(end5)
 
 if __name__ == "__main__":
     main()
