@@ -8,6 +8,8 @@ import datetime
 from multiprocessing import Manager
 from multiprocessing import Process
 
+import math
+
 def input_txt(file_address):
     with open(file_address, "r") as f:
         str = f.read()
@@ -122,6 +124,30 @@ car = []
 road = []
 cross = []
 answerPath = ""
+
+def direction(i,cross_number,car,answer):
+    width=math.sqrt(cross_number)
+    x = int(car[i][1])
+    y = int(car[i][2])
+    if x-int(x/width)*width == 0:
+        x_du = x-int(x/width)*width + width
+    else:
+        x_du = x - int(x / width) * width
+    if y-int(y/width)*width == 0:
+        y_du = y-int(y/width)*width + width
+    else:
+        y_du = y - int(y / width) * width
+    if y/-2*width < x < y+2*width:
+        if x_du <= y_du:
+            pass#北
+        else:
+            pass#南
+    else:
+        if x <= y:
+            answer[i][1] = 300#东
+        else:
+            answer[i][1] = 300#西
+
 
 
 def main():
@@ -254,6 +280,16 @@ def main():
 
     end3 = datetime.datetime.now() - start
     print(end3)#2.03.45
+
+    ###################################方向车辆################
+    for i in range(len(car)):
+        direction(i, cross_number, car, answer)
+
+
+    ###################################方向车辆################
+
+
+
     ################################频率最低路线生成###########################################
     for i in range(int(road_number / 3)):  # 设置：取消道路行驶权占总道路的比例
         max_frequency_road = 0
