@@ -368,6 +368,16 @@ def main():
     for item in answer_wide_road:
         answerWideRoadMap.setdefault(item[0], item)
 
+    # 定义字典，用于存储道路的长度
+    roadMap = {}
+    for roadItem in road:
+        roadMap.setdefault(roadItem[0], roadItem[1])
+
+    # 定义字典，用于存储车辆  key：carId   value:  car
+    carMap = {}
+    for carItem in car:
+        carMap.setdefault(carItem[0], carItem)
+
     # 定义所有车辆终点数组
     carEndPoint = []
     for i in range(car_number):
@@ -461,7 +471,37 @@ def main():
     # 是否第一次发车
     firstStartCar = 0
     for key, values in directionMap.items():
-        # 对所有南北  和 东西的车辆进行按速度分类
+        # 对所有南北  和 东西的车辆进行按距离分类
+
+        # # 定义所有车辆距离字典
+        # carDistance = {}
+        # for item in values:
+        #     # 通过carId获取到车辆的路径
+        #     answerNormalDis = answerNormalMap.get(item[0])
+        #     sumRoadLen = 0
+        #     for i in range(2, len(answerNormalDis)):
+        #         roadLen = roadMap.get(answerNormalDis[i])
+        #         sumRoadLen += roadLen
+        #     # 设置每辆车的距离长度
+        #     carDistance.setdefault(item[0], sumRoadLen)
+        #
+        # # 得到所有的距离长度
+        # carDistanceArray = carDistance.values()
+        #
+        # # 数组去重
+        # carDistanceArray = list(set(carDistanceArray))
+        #
+        # # 数组排序
+        # # carDistanceArray = sorted(carDistanceArray, reverse=True)
+        # carDistanceArray = sorted(carDistanceArray)
+        #
+        # # 定义数组，用于记录距离从小到大的车辆
+        # sortCarDistanceArray = []
+        # for carDistanceItem in carDistanceArray:
+        #     for key, values in carDistance.items():
+        #         if values == carDistanceItem:
+        #             tempCar = carMap.get(key)
+        #             sortCarDistanceArray.append(tempCar)
 
         # 得到所有车的速度数组
         speedArray = []
@@ -478,30 +518,41 @@ def main():
                     maxSpeed = carSpeed
                 speedArray.append(carSpeed)
 
-        # 对距离进行划分
-
         halfMaxSpeed = int( maxSpeed/ 2)
 
         # 车辆发车计数器
-        carStartCount = 0
+        carStartCount = 1
 
         shardCount = 80
+
+
         #按照速度划分
         for item in values:
 
-            if carStartCount >= shardCount:
-                planTime += 4
-                carStartCount = 0
+            if carStartCount % shardCount == 0:
+                # 最后的车辆，同时发车
+                if carStartCount <= int(0.9*values.__len__()):
+                    planTime += 3
 
             # 得到车辆的ID
             carId = item[0]
             carSpeed = item[3]
 
-            # 按照速度划分
             if carSpeed < halfMaxSpeed:
                 car = answerHighMap.get(carId)
             else:
                 car = answerSlowMap.get(carId)
+
+            # if carStartCount < int(0.05*values.__len__()):
+            #     car = answerNormalMap.get(carId)
+            # elif carStartCount < int(0.95*values.__len__()):
+            #     # 按照速度划分
+            #     if carSpeed < halfMaxSpeed:
+            #         car = answerHighMap.get(carId)
+            #     else:
+            #         car = answerSlowMap.get(carId)
+            # else:
+            #     car = answerNormalMap.get(carId)
 
             # 修改车辆的planTime   当前时间片 + 最高速度 - 车辆当前速度
             # 这样能够让速度快的车辆，优先先行，慢车就会排在快车的后面
