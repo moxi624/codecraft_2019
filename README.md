@@ -77,6 +77,14 @@ python src/simulator.py config/car.txt config/road.txt config/cross.txt config/a
 
 
 
+#### 引入西北，东南角法
+
+发车以西北和东南两块区域进行发车
+
+创建分支，提交V0.0.5版本
+
+
+
 
 
 ### 错误路线
