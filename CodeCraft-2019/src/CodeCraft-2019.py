@@ -141,7 +141,7 @@ def direction(cross_number, car, answer):
             y_du = y-int(y/width)*width + width
         else:
             y_du = y - int(y / width) * width
-        if x-(width*(5/8)*width) < y < x+(width*(5/8)**width):
+        if x-(width*(5/8)*width) < y < x+(width*(5/8)*width):
             if x_du <= y_du:
                 # 北
                 NorthAndSouthCarArray.append(car[i])
@@ -256,6 +256,7 @@ def main():
     p1.start()
     p2.start()
     p3.start()
+
     p1.join()
     p2.join()
     p3.join()
@@ -402,19 +403,6 @@ def main():
         if tag == 0:
             carStartPoint.append(car[i][1])
 
-    # 定义所有车辆距离数组
-    carDistancePoint = []
-    for i in range(car_number):
-        # 定义标志位，判断是否包含该元素
-        tag = 0
-        for j in range(len(carStartPoint)):
-            if car[i][1] == carStartPoint[j]:
-                tag = 1
-                break
-        if tag == 0:
-            carStartPoint.append(car[i][1])
-
-
     # 定义所有车辆计划出发时间的数组集合
     # carPlanTimePoint = []
     # for i in range(car_number):
@@ -506,6 +494,7 @@ def main():
         # 得到所有车的速度数组
         speedArray = []
         maxSpeed = 0
+
         for item in values:
             carSpeed = item[3]
             flag = 0
@@ -519,12 +508,16 @@ def main():
                 speedArray.append(carSpeed)
 
         halfMaxSpeed = int( maxSpeed/ 2)
+        halfMaxSpeed_8_3 = int(maxSpeed * (3/8))
+        halfMaxSpeed_8_5 = int(maxSpeed * (5/8))
 
         # 车辆发车计数器
         carStartCount = 1
 
-        shardCount = 80
+        shardCount = 100
 
+        if planTime > 0:
+            planTime += 40
 
         #按照速度划分
         for item in values:
@@ -532,7 +525,11 @@ def main():
             if carStartCount % shardCount == 0:
                 # 最后的车辆，同时发车
                 if carStartCount <= int(0.9*values.__len__()):
-                    planTime += 3
+                    planTime += 4
+                # elif carStartCount <= int(0.7*values.__len__()):
+                #     planTime += 4
+                # else:
+                #     planTime += 5
 
             # 得到车辆的ID
             carId = item[0]
