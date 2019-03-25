@@ -458,6 +458,10 @@ def main():
     planTime = 0
     # 是否第一次发车
     firstStartCar = 0
+
+    # 记录外层循环次数
+    tempCount = 0
+
     for key, values in directionMap.items():
         # 对所有南北  和 东西的车辆进行按距离分类
 
@@ -514,7 +518,10 @@ def main():
         # 车辆发车计数器
         carStartCount = 1
 
-        shardCount = 100
+        if tempCount == 0:
+            shardCount = 100
+        elif tempCount >= 1:
+            shardCount = 90
 
         if planTime > 0:
             planTime += 40
@@ -524,12 +531,17 @@ def main():
 
             if carStartCount % shardCount == 0:
                 # 最后的车辆，同时发车
-                if carStartCount <= int(0.9*values.__len__()):
-                    planTime += 4
-                # elif carStartCount <= int(0.7*values.__len__()):
-                #     planTime += 4
-                # else:
-                #     planTime += 5
+                if tempCount == 0:
+                    if carStartCount <= int(0.2*values.__len__()):
+                        planTime += 0
+                    else:
+                        planTime += 4
+
+                elif tempCount >= 1:
+                    if carStartCount <= int(0.8*values.__len__()):
+                        planTime += 4
+                    elif carStartCount <= int(0.9*values.__len__()):
+                        planTime += 3
 
             # 得到车辆的ID
             carId = item[0]
@@ -560,6 +572,7 @@ def main():
             answerMap.setdefault(carId, car)
             carStartCount += 1
 
+        tempCount +=1
     ####################################################以东西南北进行划分END###########################################
 
     ###############################################以终点进行划分#######################################################
