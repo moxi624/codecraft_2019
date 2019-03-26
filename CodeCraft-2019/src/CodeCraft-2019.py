@@ -228,8 +228,8 @@ def main():
                                     cross_adjacency_matrix[i + 1][x + 1] = (
                                             road[r][1] / (0.95 * road[r][2] * (road[r][3])))  # 获得路口之间距离
                                     cross_adjacency_high_speed[i + 1][x + 1] = (
-                                            10 / (1.5 * road[r][2] * (road[r][3]))) + random.uniform(-0.15 ,0.15)  # 速度块
-                                    cross_adjacency_slow_speed[i + 1][x + 1] = (road[r][2] / (road[r][3])) + random.uniform(-1.5 ,1.5)  # 速度慢
+                                            10 / (1.5 * road[r][2] * (road[r][3]))) + random.uniform(-0.10 ,0.10)  # 速度块
+                                    cross_adjacency_slow_speed[i + 1][x + 1] = (road[r][2] / (road[r][3])) + random.uniform(-1.0 ,1.0)  # 速度慢
                                     cross_adjacency_wide_road[i + 1][x + 1] = 10/road[r][3]
     # 重新评估权重2019-3-18
     # print(cross_adjacency_wide_road)
