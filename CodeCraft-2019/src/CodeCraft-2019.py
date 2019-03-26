@@ -3,12 +3,16 @@ import sys
 # to read input file
 import pandas as pd
 import numpy as np
-from numpy.random import rand
+
+import random
+
 import datetime
 from multiprocessing import Manager
 from multiprocessing import Process
 
 import math
+
+random.seed(1) #设置随机种子
 
 def input_txt(file_address):
     with open(file_address, "r") as f:
@@ -224,8 +228,8 @@ def main():
                                     cross_adjacency_matrix[i + 1][x + 1] = (
                                             road[r][1] / (0.95 * road[r][2] * (road[r][3])))  # 获得路口之间距离
                                     cross_adjacency_high_speed[i + 1][x + 1] = (
-                                            10 / (1.5 * road[r][2] * (road[r][3])))  # 速度块
-                                    cross_adjacency_slow_speed[i + 1][x + 1] = (road[r][2] / (road[r][3]))  # 速度慢
+                                            10 / (1.5 * road[r][2] * (road[r][3]))) + random.uniform(-0.15 ,0.15)  # 速度块
+                                    cross_adjacency_slow_speed[i + 1][x + 1] = (road[r][2] / (road[r][3])) + random.uniform(-1.5 ,1.5)  # 速度慢
                                     cross_adjacency_wide_road[i + 1][x + 1] = 10/road[r][3]
     # 重新评估权重2019-3-18
     # print(cross_adjacency_wide_road)
@@ -520,7 +524,7 @@ def main():
 
         if tempCount == 0:
             shardCount = 100
-        elif tempCount >= 1:
+        else:
             shardCount = 90
 
         if planTime > 0:
