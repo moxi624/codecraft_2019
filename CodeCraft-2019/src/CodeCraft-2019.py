@@ -522,12 +522,12 @@ def main():
         carStartCount = 1
 
         if tempCount == 0:
-            shardCount = 100
+            shardCount = 105
         else:
-            shardCount = 90
+            shardCount = 95
 
         if planTime > 0:
-            planTime += 40
+            planTime += 38
 
         #按照速度划分
         for item in values:
