@@ -550,28 +550,34 @@ def main():
             carId = item[0]
             carSpeed = item[3]
 
-            if carSpeed < halfMaxSpeed:
-                car = answerHighMap.get(carId)
-            else:
-                car = answerSlowMap.get(carId)
-
-            # if carStartCount < int(0.05*values.__len__()):
-            #     car = answerNormalMap.get(carId)
-            # elif carStartCount < int(0.95*values.__len__()):
-            #     # 按照速度划分
-            #     if carSpeed < halfMaxSpeed:
-            #         car = answerHighMap.get(carId)
-            #     else:
-            #         car = answerSlowMap.get(carId)
+            # if carSpeed < halfMaxSpeed:
+            #     car = answerHighMap.get(carId)
             # else:
-            #     car = answerNormalMap.get(carId)
+            #     car = answerSlowMap.get(carId)
+
+            if carStartCount < int(0.05*values.__len__()):
+                car = answerNormalMap.get(carId)
+            elif carStartCount < int(0.95*values.__len__()):
+                # 按照速度划分
+                if carSpeed < halfMaxSpeed:
+                    if carStartCount % 7 == 0:
+                        car = answerNormalMap.get(carId)
+                    else:
+                        car = answerHighMap.get(carId)
+                else:
+                    if carStartCount % 7 == 0:
+                        car = answerLowFrequencyMap.get(carId)
+                    else:
+                        car = answerSlowMap.get(carId)
+            else:
+                car = answerNormalMap.get(carId)
 
             # 修改车辆的planTime   当前时间片 + 最高速度 - 车辆当前速度
             # 这样能够让速度快的车辆，优先先行，慢车就会排在快车的后面
             if planTime < item[4]:
                 car[1] = item[4]
             else:
-                car[1] = planTime + maxSpeed - carSpeed
+                car[1] = int(planTime + maxSpeed - carSpeed)
             answerMap.setdefault(carId, car)
             carStartCount += 1
 
