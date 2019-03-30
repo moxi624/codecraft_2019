@@ -559,14 +559,14 @@ def main():
                 car = answerHighMap.get(carId)
             elif carStartCount < int(0.95*values.__len__()):
                 # 按照速度划分
-                if carSpeed < halfMaxSpeed:
+                if carSpeed == 4 or carSpeed == 6:
                     if carStartCount % 7 == 0:
                         car = answerHighMap.get(carId)
                     else:
                         car = answerHighMap.get(carId)
                 else:
                     if carStartCount % 7 == 0:
-                        car = answerSlowMap.get(carId)
+                        car = answerHighMap.get(carId)
                     else:
                         car = answerSlowMap.get(carId)
             else:
