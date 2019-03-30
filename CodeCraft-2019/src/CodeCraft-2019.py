@@ -433,12 +433,12 @@ def main():
         carStartCount = 1
 
         if tempCount == 0:
-            shardCount = 100
+            shardCount = 130
         else:
-            shardCount = 90
+            shardCount = 120
 
-        if planTime > 0:
-            planTime += 38
+        # if planTime > 0:
+        #     planTime += 38
 
         #按照速度划分
         for item in values:
@@ -446,16 +446,16 @@ def main():
             if carStartCount % shardCount == 0:
                 # 最后的车辆，同时发车
                 if tempCount == 0:
-                    if carStartCount <= int(0.2*values.__len__()):
-                        planTime += 4
+                    if carStartCount <= int(0.15*values.__len__()):
+                        planTime += 3.5
                     else:
-                        planTime += 5
+                        planTime += 4.5
 
                 elif tempCount >= 1:
                     if carStartCount <= int(0.8*values.__len__()):
                         planTime += 4
                     elif carStartCount <= int(0.9*values.__len__()):
-                        planTime += 5
+                        planTime += 3
 
             # 得到车辆的ID
             carId = item[0]
@@ -466,9 +466,9 @@ def main():
             # else:
             #     car = answerSlowMap.get(carId)
 
-            if carStartCount < int(0.05*values.__len__()):
+            if carStartCount < int(0.2*values.__len__()):
                 car = answerHighMap.get(carId)
-            elif carStartCount < int(0.95*values.__len__()):
+            elif carStartCount < int(0.8*values.__len__()):
                 # 按照速度划分
                 if carSpeed == 4 or carSpeed == 6:
                     if carStartCount % 7 == 0:
