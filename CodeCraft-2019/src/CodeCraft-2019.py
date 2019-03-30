@@ -39,7 +39,7 @@ def output_txt(file_address, answer):
 
 
 # 用Dijkstra's Algorithm算法，计算出最短路径
-def Dijkstra(points, graph, start, end, dictionary):
+def Dijkstra(points, graph, start, end, dictionary,_cross):
     pre = [0] * (points + 1)  # 记录前驱
     vis = [0] * (points + 1)  # 记录节点遍历状态
     dis = [float('inf') for i in range(points + 1)]  # 保存最短距离
@@ -77,19 +77,19 @@ def Dijkstra(points, graph, start, end, dictionary):
     mark = 0
     len -= 1
     while len >= 0:
-        roads.append(road[len])
+        roads.append(_cross[road[len]-1][0])
         len -= 1
     # print(str(start+1)+" 到 "+str(end+1))
     # print("最短距离：", dis[end],end=" ")
     # print("最短路径：", roads)
-    dictionary[str(start) + '-' + str(end)] = roads
+    dictionary[str(_cross[start-1][0]) + '-' + str(_cross[end-1][0])] = roads
 
 
 # 固定map图
-def map(cross_number, matrix, dictionary):
+def map(cross_number, matrix, dictionary,_cross):
     for i in range(cross_number):
         for j in range(cross_number):
-            Dijkstra(cross_number, matrix, i + 1, j + 1, dictionary)  # 普通权重
+            Dijkstra(cross_number, matrix, i + 1, j + 1, dictionary,_cross)  # 普通权重
 
 
 def cross_frequency(cross_number):
@@ -105,13 +105,13 @@ def road_frequency(road_number):
     return count_road_frequency
 
 
-def generating_path(car_number, path, node, cross_road, count_road_frequency,count_cross_frequency):  # node:生成车辆的节点路径
-    for i in range(car_number):
-        every_answer = [car[i][0], car[i][4]]
-        walk = node[str(car[i][1]) + '-' + str(car[i][2])]
+def generating_path(car, path, node, cross_road, count_road_frequency,count_cross_frequency):  # node:生成车辆的节点路径
+    for i in car:
+        every_answer = [i[0], i[4]]
+        walk = node[str(i[1]) + '-' + str(i[2])]
         for j in range(len(walk) - 1):
-            count_cross_frequency[walk[j]] += 1
-            count_road_frequency[(cross_road[str(walk[j]) + '-' + str(walk[j + 1])])-road[0][0]] += 1
+            # count_cross_frequency[walk[j]] += 1
+            # count_road_frequency[(cross_road[str(walk[j]) + '-' + str(walk[j + 1])])] += 1
             every_answer.append(cross_road[str(walk[j]) + '-' + str(walk[j + 1])])  # 将2节点通过字典转化为中间的道路ID
         path.append(every_answer)
 
@@ -128,7 +128,7 @@ cross = []
 answerPath = ""
 
 # 将车辆分类成南北车辆  和 东西车辆
-def direction(cross_number, car, answer):
+def direction(cross_number, car):
     NorthAndSouthCarArray = []
     EastAndWestCarArray = []
     for i in range(len(car)):
@@ -253,9 +253,9 @@ def main():
     # 道路宽的路径字典
     wide_road = {}
 
-    p1 = Process(target=map,args=(cross_number, cross_adjacency_matrix,shortest_distance))#普通路线
-    p2 = Process(target=map,args=(cross_number, cross_adjacency_high_speed, high_speed))  # 速度最快路线
-    p3 = Process(target=map,args=(cross_number, cross_adjacency_slow_speed, slow_speed))  # 速度最慢路线
+    p1 = Process(target=map,args=(cross_number, cross_adjacency_matrix,shortest_distance,cross))#普通路线
+    p2 = Process(target=map,args=(cross_number, cross_adjacency_high_speed, high_speed,cross))  # 速度最快路线
+    p3 = Process(target=map,args=(cross_number, cross_adjacency_slow_speed, slow_speed,cross))  # 速度最慢路线
     p1.start()
     p2.start()
     p3.start()
@@ -264,7 +264,7 @@ def main():
     p2.join()
     p3.join()
     # map(cross_number, cross_adjacency_wide_road, wide_road)  # 路最的宽路线
-    # print(high_speed)
+    # print(shortest_distance)
     end2 = datetime.datetime.now() - start
     print(end2)#1.59.01s
 
@@ -284,13 +284,13 @@ def main():
     answer_wide_road = [] # 道路宽的路径
 
     # 生成每辆车的road路径
-    generating_path(car_number, answer, shortest_distance, cross_road,
+    generating_path(car, answer, shortest_distance, cross_road,
                     count_road_frequency,count_cross_frequency)#普通路线
-    generating_path(car_number, answer_high_speed, high_speed, cross_road,
+    generating_path(car, answer_high_speed, high_speed, cross_road,
                     count_road_frequency,count_cross_frequency)  # 速度最快路线
-    generating_path(car_number, answer_slow_speed, slow_speed, cross_road,
+    generating_path(car, answer_slow_speed, slow_speed, cross_road,
                     count_road_frequency,count_cross_frequency)  # 速度最慢路线
-    # generating_path(car_number, answer_wide_road, wide_road, cross_road,
+    # generating_path(car, answer_wide_road, wide_road, cross_road,
     #                 count_road_frequency, count_cross_frequency)  # 道路宽路线
 
     end3 = datetime.datetime.now() - start
@@ -299,49 +299,49 @@ def main():
     ###################################方向车辆################
 
     # key：东西，南北    value：东西南北车辆Array
-    directionMap = direction(cross_number, car, answer)
+    directionMap = direction(cross_number, car)
 
     ###################################方向车辆################
 
 
 
     ################################频率最低路线生成###########################################
-    for i in range(int(road_number / 3)):  # 设置：取消道路行驶权占总道路的比例
-        max_frequency_road = 0
-        index_frequency_road = 0
-        for i in range(len(count_road_frequency)):
-            if count_road_frequency[i] < float('inf'):
-                if count_road_frequency[i] > max_frequency_road:
-                    max_frequency_road = count_road_frequency[i]
-                    index_frequency_road = i
-        count_road_frequency[index_frequency_road] = 999999
-    # print(count_road_frequency)
-
-    for i in range(cross_number):
-        for j in range(1, 5):
-            if cross[i][j] == -1:
-                continue
-            for x in range(cross_number):
-                for y in range(1, 5):
-                    if cross[i][j] == cross[x][y]:  # 找出相邻路口
-                        for r in range(road_number):
-                            if road[r][0] == cross[i][j] and i != x:
-                                if road[r][6] == 0 and road[r][5] == cross[i][0]:
-                                    continue
-                                else:
-                                    cross_adjacency_infrequent[i + 1][x + 1] = count_road_frequency[r]/road[r][3] # 行驶次数最少的路
-
-    # 低频路线，取消频率过高路线的行驶权
-    # for item in cross_adjacency_infrequent
-    #     if item >= cross_adjacency_infrequent.reshape(1,-1)
-
-    map(cross_number, cross_adjacency_infrequent, low_frequency)  # 频率低的路线
-    #print(count_cross_frequency)
-    generating_path(car_number, answer_low_frequency, low_frequency, cross_road
-                    , count_road_frequency, count_cross_frequency)  # 频率低的路线
-
-    end4 = datetime.datetime.now() - start
-    print(end4)
+    # for i in range(int(road_number / 3)):  # 设置：取消道路行驶权占总道路的比例
+    #     max_frequency_road = 0
+    #     index_frequency_road = 0
+    #     for i in range(len(count_road_frequency)):
+    #         if count_road_frequency[i] < float('inf'):
+    #             if count_road_frequency[i] > max_frequency_road:
+    #                 max_frequency_road = count_road_frequency[i]
+    #                 index_frequency_road = i
+    #     count_road_frequency[index_frequency_road] = 999999
+    # # print(count_road_frequency)
+    #
+    # for i in range(cross_number):
+    #     for j in range(1, 5):
+    #         if cross[i][j] == -1:
+    #             continue
+    #         for x in range(cross_number):
+    #             for y in range(1, 5):
+    #                 if cross[i][j] == cross[x][y]:  # 找出相邻路口
+    #                     for r in range(road_number):
+    #                         if road[r][0] == cross[i][j] and i != x:
+    #                             if road[r][6] == 0 and road[r][5] == cross[i][0]:
+    #                                 continue
+    #                             else:
+    #                                 cross_adjacency_infrequent[i + 1][x + 1] = count_road_frequency[r]/road[r][3] # 行驶次数最少的路
+    #
+    # # 低频路线，取消频率过高路线的行驶权
+    # # for item in cross_adjacency_infrequent
+    # #     if item >= cross_adjacency_infrequent.reshape(1,-1)
+    #
+    # map(cross_number, cross_adjacency_infrequent, low_frequency)  # 频率低的路线
+    # #print(count_cross_frequency)
+    # generating_path(car_number, answer_low_frequency, low_frequency, cross_road
+    #                 , count_road_frequency, count_cross_frequency)  # 频率低的路线
+    #
+    # end4 = datetime.datetime.now() - start
+    # print(end4)
     #################################频率最低路线生成################################################
 
     # 定义答案Map
@@ -566,7 +566,7 @@ def main():
                         car = answerHighMap.get(carId)
                 else:
                     if carStartCount % 7 == 0:
-                        car = answerLowFrequencyMap.get(carId)
+                        car = answerSlowMap.get(carId)
                     else:
                         car = answerSlowMap.get(carId)
             else:
@@ -759,6 +759,8 @@ def main():
 # to write output file
     end5 = datetime.datetime.now() - start
     print(end5)
+    print(len(directionMap['NorthAndSouth']))
+    print(len(directionMap['EastAndWest']))
 
 if __name__ == "__main__":
     main()
