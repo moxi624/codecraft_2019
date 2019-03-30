@@ -433,9 +433,9 @@ def main():
         carStartCount = 1
 
         if tempCount == 0:
-            shardCount = 105
+            shardCount = 100
         else:
-            shardCount = 95
+            shardCount = 90
 
         if planTime > 0:
             planTime += 38
@@ -447,15 +447,15 @@ def main():
                 # 最后的车辆，同时发车
                 if tempCount == 0:
                     if carStartCount <= int(0.2*values.__len__()):
-                        planTime += 0
-                    else:
                         planTime += 4
+                    else:
+                        planTime += 5
 
                 elif tempCount >= 1:
                     if carStartCount <= int(0.8*values.__len__()):
                         planTime += 4
                     elif carStartCount <= int(0.9*values.__len__()):
-                        planTime += 3
+                        planTime += 5
 
             # 得到车辆的ID
             carId = item[0]
