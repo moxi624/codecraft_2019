@@ -347,11 +347,6 @@ def main():
     # 定义答案Map
     answerMap = {}
 
-    # 定义字典，用于存储每个车的行驶路径
-    answerNormalMap = {}
-    for item in answer:
-        answerNormalMap.setdefault(item[0], item)
-
     # 定义字典，用于存储每个车的高速行驶路径
     answerHighMap = {}
     for item in answer_high_speed:
@@ -361,16 +356,6 @@ def main():
     answerSlowMap = {}
     for item in answer_slow_speed:
         answerSlowMap.setdefault(item[0], item)
-
-    # 定义字典，用于存储每个车的低频率行驶路径
-    answerLowFrequencyMap = {}
-    for item in answer_low_frequency:
-        answerLowFrequencyMap.setdefault(item[0], item)
-
-    # 定义字典，用于存储每个车的道路最宽行驶路径
-    answerWideRoadMap = {}
-    for item in answer_wide_road:
-        answerWideRoadMap.setdefault(item[0], item)
 
     # 定义字典，用于存储道路的长度
     roadMap = {}
@@ -382,81 +367,7 @@ def main():
     for carItem in car:
         carMap.setdefault(carItem[0], carItem)
 
-    # 定义所有车辆终点数组
-    carEndPoint = []
-    for i in range(car_number):
-        # 定义标志位，判断是否包含该元素
-        tag = 0
-        for j in range(len(carEndPoint)):
-            if car[i][2] == carEndPoint[j]:
-                tag = 1
-                break
-        if tag == 0:
-            carEndPoint.append(car[i][2])
-
-    # 定义所有车辆起点数组
-    carStartPoint = []
-    for i in range(car_number):
-        # 定义标志位，判断是否包含该元素
-        tag = 0
-        for j in range(len(carStartPoint)):
-            if car[i][1] == carStartPoint[j]:
-                tag = 1
-                break
-        if tag == 0:
-            carStartPoint.append(car[i][1])
-
-    # 定义所有车辆计划出发时间的数组集合
-    # carPlanTimePoint = []
-    # for i in range(car_number):
-    #     # 定义标志位，判断是否包含该元素
-    #     tag = 0
-    #     for j in range(len(carPlanTimePoint)):
-    #         if car[i][4] == carPlanTimePoint[j]:
-    #             tag = 1
-    #             break
-    #     if tag == 0:
-    #         carPlanTimePoint.append(car[i][4])
-
-
-
-    # 定义Map，存储相同终点的车辆， key：终点   value：该终点的所有车辆
-    endPointMap = {}
-    for i in range(len(carEndPoint)):
-        tempCarInfoArray = []
-        for j in range(car_number):
-            if carEndPoint[i] == car[j][2]:
-                tempCarInfoArray.append(car[j])
-        endPointMap.setdefault(i, tempCarInfoArray)
-
-    # 定义Map，存储相同起点的车辆， key：起点   value：该起点的所有车辆
-    startPointMap = {}
-    for i in range(len(carStartPoint)):
-        tempCarInfoArray = []
-        for j in range(car_number):
-            if carStartPoint[i] == car[j][2]:
-                tempCarInfoArray.append(car[j])
-        startPointMap.setdefault(carStartPoint[i], tempCarInfoArray)
-
-    # 定义Map，存储相同计划出发时间的车辆， key：计划出发时间   value：该计划出发时间的所有车辆
-    # planTimePointMap = {}
-    # for i in range(len(carPlanTimePoint)):
-    #     tempCarInfoArray = []
-    #     for j in range(car_number):
-    #         if carPlanTimePoint[i] == car[j][4]:
-    #             tempCarInfoArray.append(car[j])
-    #     planTimePointMap.setdefault(carPlanTimePoint[i], tempCarInfoArray)
-
-    # 定义Map，存储车辆起始距离的车辆， key：距离范围   value：该距离范围内所有车辆
-    distancePointMap = {}
-    for i in range(len(carStartPoint)):
-        tempCarInfoArray = []
-        for j in range(car_number):
-            if carStartPoint[i] == car[j][2]:
-                tempCarInfoArray.append(car[j])
-                distancePointMap.setdefault(carStartPoint[i], tempCarInfoArray)
-
-    ####################################################以东西南北进行划分##############################################
+    ###################################################以东西南北进行划分##############################################
 
     planTime = 0
     # 是否第一次发车
@@ -583,171 +494,6 @@ def main():
 
         tempCount +=1
     ####################################################以东西南北进行划分END###########################################
-
-    ###############################################以终点进行划分#######################################################
-    # # 定义系统调度时间
-    # totalTIme = 600
-    #
-    # # 定义每个时间片调度时间
-    # # step = int(totalTIme / endPointMap.keys().__len__())
-    #
-    # planTime = 0
-    #
-    # startMaxPlanTime = 0
-    #
-    # # 是否第一次发车
-    # firstStartCar = 1
-    #
-    # # 已经出发的车辆
-    # haveStartCar = []
-    # # 获得每个分类的车辆出发时间片
-    # for key, values in endPointMap.items():
-    #
-    #     # 把该分类下的车取出来，和以该Key作为起点的车，取出来，合并成一个新的数组
-    #     # startPointCarList = startPointMap.get(key)
-    #
-    #     # 定义一个阈值，当小于某个值的时候，那么就将以该起点的车也一起发送
-    #     startPointCarList = []
-    #
-    #     # tempStartPointCarList = startPointMap.get(key)
-    #     # # 每个终点发送的车辆数目
-    #     # thresholdValue = 30
-    #     # # 进行五轮迭代发车后，就不在终点处继续发车了
-    #     # if firstStartCar <= 10:
-    #     #     if tempStartPointCarList != None:
-    #     #         for car in tempStartPointCarList:
-    #     #             if thresholdValue <= 0:
-    #     #                 break
-    #     #             thresholdValue = thresholdValue - 1
-    #     #             startPointCarList.append(car)
-    #
-    #     mergeCarList = values + startPointCarList
-    #
-    #     # 将要出发的车辆列表
-    #     willStartCar = []
-    #
-    #     # 判断该分类区间的车，是否有已经出发的车辆
-    #     for item in mergeCarList:
-    #         isStart = 0
-    #         for startClassItem in haveStartCar:
-    #             if item[0] == startClassItem:
-    #                 isStart = 1
-    #                 break
-    #         if isStart == 0:
-    #             willStartCar.append(item)
-    #
-    #     # 将马上要出发的车，存入发车列表
-    #     for car in willStartCar:
-    #         haveStartCar.append(car[0])
-    #
-    #     # 时间片大小进一步划分（根据驶入当前终点的车辆数，动态改变 ）  （总分片/ 总车辆 ）* 当前点车辆
-    #     step = int((totalTIme / car_number) * len(values))
-    #     # 太小的时间片，给一个默认值
-    #     if step < 3:
-    #         step = step + 2
-    #     # 太大的时间片，是否也设置一个最大值呢？
-    #
-    #     # 第一次读取最大的出发时间
-    #     if startMaxPlanTime == 0:
-    #         # 设置状态位，表示第一次发车
-    #         firstStartCar = 1
-    #         for item in values:
-    #             if item[4] > startMaxPlanTime:
-    #                 startMaxPlanTime = item[4]
-    #         planTime = startMaxPlanTime
-    #     else:
-    #         # 慢慢递增
-    #         firstStartCar += 1
-    #
-    #         # 最后一些车辆，让它们一起发车
-    #         if firstStartCar <= int(0.9 * endPointMap.keys().__len__()):
-    #             planTime += step
-    #
-    #     # planC 快车先行
-    #     # 得到所有车的速度数组
-    #     speedArray = []
-    #     maxSpeed = 0
-    #     for item in willStartCar:
-    #         carSpeed = item[3]
-    #         flag = 0
-    #         for tempSpeed in speedArray:
-    #             if tempSpeed == carSpeed:
-    #                 flag = 1
-    #         if flag == 0:
-    #             # 得到最高速度
-    #             if carSpeed > maxSpeed:
-    #                 maxSpeed = carSpeed
-    #             speedArray.append(carSpeed)
-    #
-    #     speedArray = sorted(speedArray)
-    #
-    #     # 将车辆按速度从小到大排序
-    #     tempWillStartCar = []
-    #     for tempCarSpeed in speedArray:
-    #         for item in willStartCar:
-    #             carSpeed = item[3]
-    #             if carSpeed == tempCarSpeed:
-    #                 tempWillStartCar.append(item)
-    #
-    #     willStartCar = tempWillStartCar
-    #
-    #     halfMaxSpeed = int( maxSpeed/ 2)
-    #
-    #     halfCount = int((len(willStartCar)) / 2)
-    #
-    #     count_7_3 = int((len(willStartCar) / 7)*3)
-    #     count_7_4 = int((len(willStartCar) / 7) * 4)
-    #
-    #     # 计数器，用于计算该分类下，出发的车辆
-    #     startCarCount = 0
-    #     for item in values:
-    #         startCarCount += 1
-    #
-    #         # 得到车辆的ID
-    #         carId = item[0]
-    #         carSpeed = item[3]
-    #
-    #         # 按照速度划分
-    #         # if carSpeed < halfMaxSpeed:
-    #         #     car = answerHighMap.get(carId)
-    #         # else:
-    #         #     car = answerSlowMap.get(carId)
-    #
-    #         # 按出发车辆规划路线
-    #         # if halfCount > startCarCount:
-    #         #     # 走快速车道
-    #         #     car = answerHighMap.get(carId)
-    #         # else:
-    #         #     # 走最少行驶车道
-    #         #     car = answerSlowMap.get(carId)
-    #
-    #         # 设置一个阈值，当时间片快要结束的时候，所有的车，都走快速车道
-    #         if firstStartCar <= int(0.1*endPointMap.keys().__len__()):
-    #             car = answerNormalMap.get(carId)
-    #
-    #         elif firstStartCar <= int(0.5*endPointMap.keys().__len__()):
-    #             if carSpeed < halfMaxSpeed:
-    #                 car = answerHighMap.get(carId)
-    #             else:
-    #                 car = answerSlowMap.get(carId)
-    #
-    #         elif firstStartCar <= int(0.9*endPointMap.keys().__len__()):
-    #             if carSpeed < halfMaxSpeed:
-    #                 car = answerHighMap.get(carId)
-    #             else:
-    #                 car = answerSlowMap.get(carId)
-    #         else:
-    #             car = answerNormalMap.get(carId)
-    #
-    #
-    #         # 修改车辆的planTime   当前时间片 + 最高速度 - 车辆当前速度
-    #         # 这样能够让速度快的车辆，优先先行，慢车就会排在快车的后面
-    #         if firstStartCar == 1:
-    #             car[1] = item[4]
-    #         else:
-    #             car[1] = planTime + maxSpeed - carSpeed
-    #         answerMap.setdefault(carId, car)
-    ###############################################以终点进行划分#######################################################
 
     result = []
     for item in answerMap.values():
