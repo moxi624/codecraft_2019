@@ -143,7 +143,7 @@ def direction(cross_number, car):
             y_du = y-int(y/width)*width + width
         else:
             y_du = y - int(y / width) * width
-        if x-(width*(5/8)*width) < y < x+(width*(5/8)*width):
+        if x-(width*(3.6)*width) < y < x+(width*(3.6)*width):
             if x_du <= y_du:
                 # 北
                 NorthAndSouthCarArray.append(car[i])
@@ -199,16 +199,16 @@ def main():
     cross_frequency(cross_number)#初始化count_cross_frequency
     road_frequency(road_number)#初始化count_cross_frequency
 
-    cross_adjacency_matrix = np.ones((cross_number + 1, cross_number + 1))
-    cross_adjacency_matrix = float('inf') * cross_adjacency_matrix
+    # cross_adjacency_matrix = np.ones((cross_number + 1, cross_number + 1))
+    # cross_adjacency_matrix = float('inf') * cross_adjacency_matrix
     cross_adjacency_high_speed = np.ones((cross_number + 1, cross_number + 1))
     cross_adjacency_high_speed = float('inf') * cross_adjacency_high_speed
     cross_adjacency_slow_speed = np.ones((cross_number + 1, cross_number + 1))
     cross_adjacency_slow_speed = float('inf') * cross_adjacency_slow_speed
-    cross_adjacency_infrequent = np.ones((cross_number + 1, cross_number + 1))
-    cross_adjacency_infrequent = float('inf') * cross_adjacency_infrequent
-    cross_adjacency_wide_road = np.ones((cross_number + 1, cross_number + 1))
-    cross_adjacency_wide_road = float('inf') * cross_adjacency_wide_road
+    # cross_adjacency_infrequent = np.ones((cross_number + 1, cross_number + 1))
+    # cross_adjacency_infrequent = float('inf') * cross_adjacency_infrequent
+    # cross_adjacency_wide_road = np.ones((cross_number + 1, cross_number + 1))
+    # cross_adjacency_wide_road = float('inf') * cross_adjacency_wide_road
 
     # 构建路口的邻接矩阵(数值为距离，-1为不连通）
     for i in range(cross_number):
@@ -223,12 +223,12 @@ def main():
                                 if road[r][6] == 0 and road[r][5] == cross[i][0]:
                                     continue
                                 else:
-                                    cross_adjacency_matrix[i + 1][x + 1] = (
-                                            road[r][1] / (0.95 * road[r][2] * (road[r][3])))  # 获得路口之间距离
+                                    # cross_adjacency_matrix[i + 1][x + 1] = (
+                                    #         road[r][1] / (0.95 * road[r][2] * (road[r][3])))  # 获得路口之间距离
                                     cross_adjacency_high_speed[i + 1][x + 1] = (
                                             10 / (1.5 * road[r][2] * (road[r][3])))# 速度块
                                     cross_adjacency_slow_speed[i + 1][x + 1] = (road[r][2] / (road[r][3]))# 速度慢
-                                    cross_adjacency_wide_road[i + 1][x + 1] = 10/road[r][3]
+                                    # cross_adjacency_wide_road[i + 1][x + 1] = 10/road[r][3]
 
     # 重新评估权重2019-3-18
     # print(cross_adjacency_wide_road)
@@ -242,25 +242,25 @@ def main():
 
     # 生成经过cross的路线
 
-    # 最短距离节点路径字典
-    shortest_distance = Manager().dict()
+    # # 最短距离节点路径字典
+    # shortest_distance = Manager().dict()
     # 速度最快节点路径字典
     high_speed = Manager().dict()
     # 速度最慢节点路径字典
     slow_speed = Manager().dict()
-    # 频率低节点路径字典
-    low_frequency = Manager().dict()
+    # # 频率低节点路径字典
+    # low_frequency = Manager().dict()
     # 道路宽的路径字典
     wide_road = {}
 
-    p1 = Process(target=map,args=(cross_number, cross_adjacency_matrix,shortest_distance,cross))#普通路线
+    # p1 = Process(target=map,args=(cross_number, cross_adjacency_matrix,shortest_distance,cross))#普通路线
     p2 = Process(target=map,args=(cross_number, cross_adjacency_high_speed, high_speed,cross))  # 速度最快路线
     p3 = Process(target=map,args=(cross_number, cross_adjacency_slow_speed, slow_speed,cross))  # 速度最慢路线
-    p1.start()
+    # p1.start()
     p2.start()
     p3.start()
 
-    p1.join()
+    # p1.join()
     p2.join()
     p3.join()
     # map(cross_number, cross_adjacency_wide_road, wide_road)  # 路最的宽路线
@@ -284,8 +284,8 @@ def main():
     answer_wide_road = [] # 道路宽的路径
 
     # 生成每辆车的road路径
-    generating_path(car, answer, shortest_distance, cross_road,
-                    count_road_frequency,count_cross_frequency)#普通路线
+    # generating_path(car, answer, shortest_distance, cross_road,
+    #                 count_road_frequency,count_cross_frequency)#普通路线
     generating_path(car, answer_high_speed, high_speed, cross_road,
                     count_road_frequency,count_cross_frequency)  # 速度最快路线
     generating_path(car, answer_slow_speed, slow_speed, cross_road,
@@ -467,12 +467,12 @@ def main():
             #     car = answerSlowMap.get(carId)
 
             if carStartCount < int(0.05*values.__len__()):
-                car = answerNormalMap.get(carId)
+                car = answerHighMap.get(carId)
             elif carStartCount < int(0.95*values.__len__()):
                 # 按照速度划分
                 if carSpeed == 4 or carSpeed == 6:
                     if carStartCount % 7 == 0:
-                        car = answerNormalMap.get(carId)
+                        car = answerHighMap.get(carId)
                     else:
                         car = answerHighMap.get(carId)
                 else:
@@ -481,7 +481,7 @@ def main():
                     else:
                         car = answerSlowMap.get(carId)
             else:
-                car = answerNormalMap.get(carId)
+                car = answerHighMap.get(carId)
 
             # 修改车辆的planTime   当前时间片 + 最高速度 - 车辆当前速度
             # 这样能够让速度快的车辆，优先先行，慢车就会排在快车的后面
